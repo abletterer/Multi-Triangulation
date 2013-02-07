@@ -1,6 +1,12 @@
 bin/*
+bin/.*
+!bin/.gitkeep
 build/*
+build/.*
+!build/.gitkeep
 Debug/*
 !Debug/CMakeLists.txt
+Debug/.*
 Release/*
 !Release/CMakeLists.txt
+Release/.*
