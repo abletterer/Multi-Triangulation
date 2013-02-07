@@ -23,24 +23,47 @@
 *******************************************************************************/
 #ifndef _VDPMesh_App_
 #define _VDPMesh_App_
+
 #include "Utils/Qt/qtSimple.h"
 #include "ui_VDPMesh_App.h"
 #include "Utils/Qt/qtui.h"
 
+#include "Topology/generic/parameters.h"
+
+#include "Topology/map/embeddedMap2.h"
+#include "Algo/Render/GL2/topoRender.h"
+
+#include "VDPMesh.h"
+
 using namespace CGoGN;
+
+struct PFP: public PFP_STANDARD
+{
+    typedef EmbeddedMap2 MAP;
+};
+
+typedef PFP::MAP MAP;
+typedef PFP::VEC3 VEC3;
 
 class VDPMesh_App: public Utils::QT::SimpleQT
 {
 	Q_OBJECT
+protected:
+    MAP m_map;
+    VertexAttribute<VEC3> position;
+    Algo::Render::GL2::TopoRender* m_render_topo;
+
 public:
 
-	VDPMesh_App() {}
+	VDPMesh_App():m_render_topo(NULL) {}
 
 	~VDPMesh_App() {}
-
-	void cb_redraw();
+    
+    void createMap();
 
 	void cb_initGL();
+
+	void cb_redraw();
 
 	//void cb_mousePress(int button, int x, int y);
 
