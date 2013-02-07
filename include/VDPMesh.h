@@ -14,6 +14,8 @@ namespace Algo {
 
 namespace Surface {
 
+namespace VDPMesh {
+
 template <typename PFP>
 class VDProgressiveMesh
 {
@@ -29,10 +31,10 @@ private:
     DartMarker& inactiveMarker;
     SelectorUnmarked dartSelect;
 
-    Algo::Decimation::EdgeSelector<PFP>* m_selector;
-    std::vector<Algo::Decimation::ApproximatorGen<PFP>*> m_approximators;
+    Algo::Surface::Decimation::EdgeSelector<PFP>* m_selector;
+    std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*> m_approximators;
     
-    Algo::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionsApproximator;
+    Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionsApproximator;
 
     std::list<Node*> front; //Le front de l'arbre
 
@@ -50,8 +52,8 @@ public:
 
     void createPM(unsigned int percentWantedVertices);
 
-    Algo::Decimation::EdgeSelector<PFP>* selector() { return m_selector; }
-    std::vector<Algo::Decimation::ApproximatorGen<PFP>*>& approximators() { return m_approximators; }
+    Algo::Surface::Decimation::EdgeSelector<PFP>* selector() { return m_selector; }
+    std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>& approximators() { return m_approximators; }
 
     void edgeCollapse(VSplit<PFP>* vs); 
     void vertexSplit(VSplit<PFP>* vs);
@@ -59,6 +61,7 @@ public:
     void coarsen();
     void refine();
 };
+}
 }
 }
 }

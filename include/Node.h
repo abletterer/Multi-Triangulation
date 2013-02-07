@@ -9,6 +9,8 @@ namespace Algo {
 
 namespace Surface {
 
+namespace VDPMesh {
+
 struct PFP: public PFP_STANDARD
 {
     typedef EmbeddedMap2 MAP;
@@ -16,7 +18,6 @@ struct PFP: public PFP_STANDARD
 
 typedef PFP::MAP MAP;
 typedef PFP::VEC3 VEC3;
-
 
 /*
  * Classe définissant les différents noeuds de l'arbre des maillages progressifs
@@ -48,6 +49,7 @@ class Node {
         VSplit<PFP>* m_vsplit;
     protected:
 };
+}
 }
 }
 }

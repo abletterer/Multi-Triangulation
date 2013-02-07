@@ -7,6 +7,9 @@ namespace Algo
 namespace Surface
 {
 
+namespace VDPMesh
+{
+
 template <typename PFP>
 VDProgressiveMesh<PFP>::VDProgressiveMesh(
         MAP& map, DartMarker& inactive,
@@ -19,13 +22,13 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
     std::vector<VertexAttribute<typename PFP::VEC3>*> pos_v;
     pos_v.push_back(&positionsTable);
 
-    m_approximators.push_back(new Algo::Decimation::Approximator_MidEdge<PFP>(m_map, pos_v));
+    m_approximators.push_back(new Algo::Surface::Decimation::Approximator_MidEdge<PFP>(m_map, pos_v));
 
     CGoGNout << "..done" << CGoGNendl;
 
     CGoGNout << "  creating selector.." << CGoGNflush;
     
-    m_selector = new Algo::Decimation::EdgeSelector_Length<PFP>(m_map, positionsTable, m_approximators, dartSelect);
+    m_selector = new Algo::Surface::Decimation::EdgeSelector_Length<PFP>(m_map, positionsTable, m_approximators, dartSelect);
     
     CGoGNout << "..done" << CGoGNendl;
 
@@ -41,7 +44,7 @@ VDProgressiveMesh<PFP>::~VDProgressiveMesh()
 {
     if(m_selector)
         delete m_selector;
-    for(typename std::vector<Algo::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
+    for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
         delete (*it);
 }
 
@@ -79,7 +82,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
         VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, d2, dd2);
 
-        for(typename std::vector<Algo::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
+        for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
         {
             (*it)->approximate(d);
             (*it)->saveApprox(d);
@@ -92,7 +95,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         unsigned int newV = m_map.template setOrbitEmbeddingOnNewCell<VERTEX>(d2);
         vs->setApproxV(newV);
 		
-        for(typename std::vector<Algo::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
+        for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 			(*it)->affectApprox(d2);
 
         m_selector->updateAfterCollapse(d2, dd2);
@@ -105,6 +108,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	
     CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
 
+}
 }
 }
 }
