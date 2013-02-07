@@ -33,7 +33,7 @@
 #include "Topology/map/embeddedMap2.h"
 #include "Algo/Render/GL2/topoRender.h"
 
-#include "VDPMesh.h"
+#include "PMesh.h"
 
 using namespace CGoGN;
 

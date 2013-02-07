@@ -52,9 +52,9 @@ template <typename PFP>
 void VDProgressiveMesh<PFP>::initialiseTree()
 {
     //Ajout d'un attribut de sommet de type Node
-    EdgeAttribute<Node*> noeud = m_map.addAttribute<Node*, EGDE>("noeud");
+    EdgeAttribute<Node*> noeud = m_map.template addAttribute<Node*, EGDE>("noeud");
 
-    AttributeContainer& container = m_map.getAttributeContainer<EDGE>();
+    AttributeContainer& container = m_map.template getAttributeContainer<EDGE>();
     for(unsigned int i = container.begin(); i != container.end(); container.next(i)) 
     {
         noeud[i] = new Node();
@@ -82,7 +82,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
         VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, d2, dd2);
 
-        EdgeAttribute<Node*> noeud = m_map.getAttribute<Node*, EDGE>("noeud");
+        EdgeAttribute<Node*> noeud = m_map.template getAttribute<Node*, EDGE>("noeud");
         Node* node = noeud[d];  //On récupère le noeud associé à l'arête courante
 
         node->setVSplit(vs);    //On associe le vsplit construit au noeud de l'arête courante
