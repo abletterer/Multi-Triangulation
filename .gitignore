@@ -1,4 +1,6 @@
 bin/*
 build/*
 Debug/*
+!Debug/CMakeLists.txt
 Release/*
+!Release/CMakeLists.txt
