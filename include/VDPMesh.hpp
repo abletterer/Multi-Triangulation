@@ -52,9 +52,9 @@ template <typename PFP>
 void VDProgressiveMesh<PFP>::initialiseTree()
 {
     //Ajout d'un attribut de sommet de type Node
-    VertexAttribute<Node*> noeud = m_map.addAttribute<Node*, VERTEX>("noeud");
+    EdgeAttribute<Node*> noeud = m_map.addAttribute<Node*, EGDE>("noeud");
 
-    AttributeContainer& container = m_map.getAttributeContainer<VERTEX>();
+    AttributeContainer& container = m_map.getAttributeContainer<EDGE>();
     for(unsigned int i = container.begin(); i != container.end(); container.next(i)) 
     {
         noeud[i] = new Node();
@@ -81,6 +81,11 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         Dart dd2 = m_map.phi2(m_map.phi_1(m_map.phi2(d)));
 
         VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, d2, dd2);
+
+        EdgeAttribute<Node*> noeud = m_map.getAttribute<Node*, EDGE>("noeud");
+        Node* node = noeud[d];  //On récupère le noeud associé à l'arête courante
+
+        node->setVSplit(vs);    //On associe le vsplit construit au noeud de l'arête courante
 
         for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
         {
@@ -109,6 +114,45 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
     CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
 
 }
+
+template <typename PFP>
+void VDProgressiveMesh<PFP>::edgeCollapse(VSplit<PFP>* vs)
+{
+    Dart d = vs->getEdge();
+	Dart dd = m_map.phi2(d);
+	
+    inactiveMarker.markOrbit<FACE>(d);
+	inactiveMarker.markOrbit<FACE>(dd);
+
+	m_map.extractTrianglePair(d);
+}
+
+template <typename PFP>
+void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
+{
+	Dart d = vs->getEdge() ;
+	Dart dd = m_map.phi2(d) ;
+	Dart d2 = vs->getLeftEdge() ;
+	Dart dd2 = vs->getRightEdge() ;
+
+	m_map.insertTrianglePair(d, d2, dd2) ;
+
+	inactiveMarker.unmarkOrbit<FACE>(d) ;
+	inactiveMarker.unmarkOrbit<FACE>(dd) ;
+}
+
+template <typename PFP>
+void VDProgressiveMesh<PFP>::coarsen()
+{
+
+}
+
+template <typename PFP>
+void VDProgressiveMesh<PFP>::refine()
+{
+    
+}
+
 }
 }
 }

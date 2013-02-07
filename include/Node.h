@@ -38,7 +38,6 @@ class Node {
 
         VSplit<PFP>* getVSplit() { return m_vsplit; }
         void setVSplit(VSplit<PFP>* vsplit) { m_vsplit = vsplit; }
-
     private:
         /*Liens dans l'arborescence*/
         Node* m_parent;
