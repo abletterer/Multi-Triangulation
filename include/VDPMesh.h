@@ -6,7 +6,7 @@
 #include "Algo/Decimation/edgeSelector.h"
 #include "Algo/Decimation/geometryApproximator.h"
 
-#include "VSplit.h"
+#include "Node.h"
 
 namespace CGoGN {
 
@@ -29,10 +29,12 @@ private:
     DartMarker& inactiveMarker;
     SelectorUnmarked dartSelect;
 
-    Algo::Surface::Decimation::EdgeSelector<PFP>* m_selector;
-    std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*> m_approximators;
+    Algo::Decimation::EdgeSelector<PFP>* m_selector;
+    std::vector<Algo::Decimation::ApproximatorGen<PFP>*> m_approximators;
     
-    Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionsApproximator;
+    Algo::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionsApproximator;
+
+    std::list<Node*> front; //Le front de l'arbre
 
 public:
     VDProgressiveMesh(
@@ -40,18 +42,22 @@ public:
         VertexAttribute<typename PFP::VEC3>& position
     );
     ~VDProgressiveMesh();
+    
+    /*
+     * Crée un noeud pour chacun des brins du maillage de départ (le plus fin)
+     */
+    void initialiseTree();
 
     void createPM(unsigned int percentWantedVertices);
 
-    Algo::Surface::Decimation::EdgeSelector<PFP>* selector() { return m_selector; }
-    std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>& approximators() { return m_approximators; }
+    Algo::Decimation::EdgeSelector<PFP>* selector() { return m_selector; }
+    std::vector<Algo::Decimation::ApproximatorGen<PFP>*>& approximators() { return m_approximators; }
 
     void edgeCollapse(VSplit<PFP>* vs); 
     void vertexSplit(VSplit<PFP>* vs);
 
     void coarsen();
     void refine();
-private:
 };
 }
 }
