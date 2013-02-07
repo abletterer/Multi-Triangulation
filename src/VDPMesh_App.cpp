@@ -1,7 +1,7 @@
 /*******************************************************************************
 * CGoGN: Combinatorial and Geometric modeling with Generic N-dimensional Maps  *
 * version 0.1                                                                  *
-* Copyright (C) 2009-2011, IGG Team, LSIIT, University of Strasbourg           *
+* Copyright (C) 2009, IGG Team, LSIIT, University of Strasbourg                *
 *                                                                              *
 * This library is free software; you can redistribute it and/or modify it      *
 * under the terms of the GNU Lesser General Public License as published by the *
@@ -17,68 +17,341 @@
 * along with this library; if not, write to the Free Software Foundation,      *
 * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA.           *
 *                                                                              *
-* Web site: http://cgogn.u-strasbg.fr/                                         *
+* Web site: http://cgogn.unistra.fr/                                           *
 * Contact information: cgogn@unistra.fr                                        *
 *                                                                              *
 *******************************************************************************/
 
 #include "VDPMesh_App.h"
-#include "Algo/Geometry/boundingbox.h"
 
-using namespace CGoGN;
-
-int main(int argc, char **argv)
+VDPMesh_App::VDPMesh_App() :
+	m_renderStyle(FLAT),
+	m_drawVertices(false),
+	m_drawEdges(false),
+	m_drawFaces(true),
+	m_drawNormals(false),
+	m_drawTopo(false),
+	m_render(NULL),
+	m_phongShader(NULL),
+	m_flatShader(NULL),
+	m_vectorShader(NULL),
+	m_simpleColorShader(NULL),
+	m_pointSprite(NULL)
 {
+	normalScaleFactor = 1.0f ;
+	vertexScaleFactor = 0.1f ;
+	faceShrinkage = 1.0f ;
 
-	QApplication app(argc, argv);
-	VDPMesh_App sqt;
-	sqt.setWindowTitle("View-Dependent Progressive Meshes");
-
-	sqt.createMap();
-
-	sqt.show();
-
-	return app.exec();
+	colClear = Geom::Vec4f(0.2f, 0.2f, 0.2f, 0.1f) ;
+	colDif = Geom::Vec4f(0.8f, 0.9f, 0.7f, 1.0f) ;
+	colSpec = Geom::Vec4f(0.9f, 0.9f, 0.9f, 1.0f) ;
+	colNormal = Geom::Vec4f(1.0f, 0.0f, 0.0f, 1.0f) ;
+	shininess = 80.0f ;
 }
 
-void VDPMesh_App::createMap() 
+void VDPMesh_App::initGUI()
 {
-    position = m_map.addAttribute<VEC3, VERTEX>("position");
+    setDock(&dock) ;
 
-    //Création de deux nouvelles faces : 1 triangle et 1 carré
-    Dart d1 = m_map.newFace(3);
-    Dart d2 = m_map.newFace(4);
-    
-    //On "coud" les deux faces ensembles
-    m_map.sewFaces(d1, d2);
+    dock.check_drawVertices->setChecked(false) ;
+    dock.check_drawEdges->setChecked(false) ;
+    dock.check_drawFaces->setChecked(true) ;
+    dock.check_drawNormals->setChecked(false) ;
 
-    position[d1] = VEC3(0, 0, 0);
-    position[m_map.phi1(d1)] = VEC3(2, 0, 0);
-    position[m_map.phi_1(d1)] = VEC3(1, 2, 0);
-    position[m_map.phi<11>(d2)] = VEC3(0, -2, 0);
-    position[m_map.phi_1(d2)] = VEC3(2, -2, 0);
-    
-    Geom::BoundingBox<PFP::VEC3> bb = Algo::Geometry::computeBoundingBox<PFP>(m_map, position);
-    float lWidthObj = std::max<PFP::REAL>(std::max<PFP::REAL>(bb.size(0), bb.size(1)), bb.size(2));
-    Geom::Vec3f lPosObj = (bb.min() +  bb.max()) / PFP::REAL(2);
+    dock.slider_verticesSize->setVisible(false) ;
+    dock.slider_normalsSize->setVisible(false) ;
 
+    dock.slider_verticesSize->setSliderPosition(50) ;
+    dock.slider_normalsSize->setSliderPosition(50) ;
 
-    // send BB info to interface for centering on GL screen
-	setParamObject(lWidthObj, lPosObj.data());
-    
-    show();
-
-    // render the topo of the map without boundary darts
-    SelectorDartNoBoundary<PFP::MAP> nb(m_map);
-	m_render_topo->updateData<PFP>(m_map, position, 0.9f, 0.9f, nb);
+	setCallBack( dock.check_drawVertices, SIGNAL(toggled(bool)), SLOT(slot_drawVertices(bool)) ) ;
+	setCallBack( dock.slider_verticesSize, SIGNAL(valueChanged(int)), SLOT(slot_verticesSize(int)) ) ;
+	setCallBack( dock.check_drawEdges, SIGNAL(toggled(bool)), SLOT(slot_drawEdges(bool)) ) ;
+	setCallBack( dock.check_drawFaces, SIGNAL(toggled(bool)), SLOT(slot_drawFaces(bool)) ) ;
+	setCallBack( dock.combo_faceLighting, SIGNAL(currentIndexChanged(int)), SLOT(slot_faceLighting(int)) ) ;
+	setCallBack( dock.check_drawTopo, SIGNAL(toggled(bool)), SLOT(slot_drawTopo(bool)) ) ;
+	setCallBack( dock.check_drawNormals, SIGNAL(toggled(bool)), SLOT(slot_drawNormals(bool)) ) ;
+	setCallBack( dock.slider_normalsSize, SIGNAL(valueChanged(int)), SLOT(slot_normalsSize(int)) ) ;
 }
 
-void VDPMesh_App::cb_initGL() 
+void VDPMesh_App::cb_initGL()
 {
-    m_render_topo = new Algo::Render::GL2::TopoRender();
+	Utils::GLSLShader::setCurrentOGLVersion(2) ;
+
+	setFocal(5.0f) ;
+
+	m_render = new Algo::Render::GL2::MapRender() ;
+	m_topoRender = new Algo::Render::GL2::TopoRender() ;
+
+	m_topoRender->setInitialDartsColor(0.25f, 0.25f, 0.25f) ;
+
+	m_positionVBO = new Utils::VBO() ;
+	m_normalVBO = new Utils::VBO() ;
+
+	m_phongShader = new Utils::ShaderPhong() ;
+	m_phongShader->setAttributePosition(m_positionVBO) ;
+	m_phongShader->setAttributeNormal(m_normalVBO) ;
+	m_phongShader->setAmbiant(colClear) ;
+	m_phongShader->setDiffuse(colDif) ;
+	m_phongShader->setSpecular(colSpec) ;
+	m_phongShader->setShininess(shininess) ;
+
+	m_flatShader = new Utils::ShaderFlat() ;
+	m_flatShader->setAttributePosition(m_positionVBO) ;
+	m_flatShader->setAmbiant(colClear) ;
+	m_flatShader->setDiffuse(colDif) ;
+	m_flatShader->setExplode(faceShrinkage) ;
+
+	m_vectorShader = new Utils::ShaderVectorPerVertex() ;
+	m_vectorShader->setAttributePosition(m_positionVBO) ;
+	m_vectorShader->setAttributeVector(m_normalVBO) ;
+	m_vectorShader->setColor(colNormal) ;
+
+	m_simpleColorShader = new Utils::ShaderSimpleColor() ;
+	m_simpleColorShader->setAttributePosition(m_positionVBO) ;
+	Geom::Vec4f c(0.1f, 0.1f, 0.1f, 1.0f) ;
+	m_simpleColorShader->setColor(c) ;
+
+	m_pointSprite = new Utils::PointSprite() ;
+	m_pointSprite->setAttributePosition(m_positionVBO) ;
+
+	registerShader(m_phongShader) ;
+	registerShader(m_flatShader) ;
+	registerShader(m_vectorShader) ;
+	registerShader(m_simpleColorShader) ;
+	registerShader(m_pointSprite) ;
 }
 
 void VDPMesh_App::cb_redraw()
 {
-    m_render_topo->drawTopo();
-} 
+	if(m_drawVertices)
+	{
+		float size = vertexScaleFactor ;
+		m_pointSprite->setSize(size) ;
+		m_pointSprite->predraw(Geom::Vec3f(0.0f, 0.0f, 1.0f)) ;
+		m_render->draw(m_pointSprite, Algo::Render::GL2::POINTS) ;
+		m_pointSprite->postdraw() ;
+	}
+
+	if(m_drawEdges)
+	{
+		glLineWidth(1.0f) ;
+		m_render->draw(m_simpleColorShader, Algo::Render::GL2::LINES) ;
+	}
+
+	if(m_drawFaces)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL) ;
+		glEnable(GL_LIGHTING) ;
+		glEnable(GL_POLYGON_OFFSET_FILL) ;
+		glPolygonOffset(1.0f, 1.0f) ;
+		switch(m_renderStyle)
+		{
+			case FLAT :
+				m_flatShader->setExplode(faceShrinkage) ;
+				m_render->draw(m_flatShader, Algo::Render::GL2::TRIANGLES) ;
+				break ;
+			case PHONG :
+				m_render->draw(m_phongShader, Algo::Render::GL2::TRIANGLES) ;
+				break ;
+		}
+		glDisable(GL_POLYGON_OFFSET_FILL) ;
+	}
+
+	if(m_drawTopo)
+	{
+		m_topoRender->drawTopo() ;
+	}
+
+	if(m_drawNormals)
+	{
+		float size = normalBaseSize * normalScaleFactor ;
+		m_vectorShader->setScale(size) ;
+		glLineWidth(1.0f) ;
+		m_render->draw(m_vectorShader, Algo::Render::GL2::POINTS) ;
+	}
+}
+
+void VDPMesh_App::cb_Open()
+{
+	std::string filters("all (*.*);; trian (*.trian);; ctm (*.ctm);; off (*.off);; ply (*.ply)") ;
+	std::string filename = selectFile("Open Mesh", "", filters) ;
+	if (filename.empty())
+		return ;
+
+	importMesh(filename) ;
+	updateGL() ;
+}
+
+void VDPMesh_App::cb_Save()
+{
+	std::string filters("all (*.*);; map (*.map);; off (*.off);; ply (*.ply)") ;
+	std::string filename = selectFileSave("Save Mesh", "", filters) ;
+
+	if (!filename.empty())
+		exportMesh(filename) ;
+}
+
+void VDPMesh_App::cb_keyPress(int keycode)
+{
+    switch(keycode)
+    {
+    	case 'c' :
+    		myMap.check();
+    		break;
+    	default:
+    		break;
+    }
+}
+
+void VDPMesh_App::importMesh(std::string& filename)
+{
+	myMap.clear(true) ;
+
+	size_t pos = filename.rfind(".");    // position of "." in filename
+	std::string extension = filename.substr(pos);
+
+	if (extension == std::string(".map"))
+	{
+		myMap.loadMapBin(filename);
+		position = myMap.getAttribute<VEC3, VERTEX>("position") ;
+	}
+	else
+	{
+		std::vector<std::string> attrNames ;
+		if(!Algo::Surface::Import::importMesh<PFP>(myMap, filename.c_str(), attrNames))
+		{
+			CGoGNerr << "could not import " << filename << CGoGNendl ;
+			return;
+		}
+		position = myMap.getAttribute<PFP::VEC3, VERTEX>(attrNames[0]) ;
+	}
+
+	myMap.enableQuickTraversal<VERTEX>() ;
+
+	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::POINTS) ;
+	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::LINES) ;
+	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::TRIANGLES) ;
+
+	m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f) ;
+
+	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
+	normalBaseSize = bb.diagSize() / 100.0f ;
+//	vertexBaseSize = normalBaseSize / 5.0f ;
+
+	normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
+	if(!normal.isValid())
+		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
+
+	Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;
+
+	m_positionVBO->updateData(position) ;
+	m_normalVBO->updateData(normal) ;
+
+	setParamObject(bb.maxSize(), bb.center().data()) ;
+	updateGLMatrices() ;
+}
+
+void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
+{
+	size_t pos = filename.rfind(".") ;    // position of "." in filename
+	std::string extension = filename.substr(pos) ;
+
+	if (extension == std::string(".off"))
+		Algo::Surface::Export::exportOFF<PFP>(myMap, position, filename.c_str(), allDarts) ;
+	else if (extension.compare(0, 4, std::string(".ply")) == 0)
+	{
+		int ascii = 0 ;
+		if (askExportMode)
+			Utils::QT::inputValues(Utils::QT::VarCombo("binary mode;ascii mode",ascii,"Save in")) ;
+
+		std::vector<VertexAttribute<VEC3>*> attributes ;
+		attributes.push_back(&position) ;
+		Algo::Surface::Export::exportPLYnew<PFP>(myMap, attributes, filename.c_str(), !ascii, allDarts) ;
+	}
+	else if (extension == std::string(".map"))
+		myMap.saveMapBin(filename) ;
+	else
+		std::cerr << "Cannot save file " << filename << " : unknown or unhandled extension" << std::endl ;
+}
+
+void VDPMesh_App::slot_drawVertices(bool b)
+{
+	m_drawVertices = b ;
+	updateGL() ;
+}
+
+void VDPMesh_App::slot_verticesSize(int i)
+{
+	vertexScaleFactor = i / 500.0f ;
+	updateGL() ;
+}
+
+void VDPMesh_App::slot_drawEdges(bool b)
+{
+	m_drawEdges = b ;
+	updateGL() ;
+}
+
+void VDPMesh_App::slot_drawFaces(bool b)
+{
+	m_drawFaces = b ;
+	updateGL() ;
+}
+
+void VDPMesh_App::slot_faceLighting(int i)
+{
+	m_renderStyle = i ;
+	updateGL() ;
+}
+
+void VDPMesh_App::slot_drawTopo(bool b)
+{
+	m_drawTopo = b ;
+	updateGL() ;
+}
+
+void VDPMesh_App::slot_drawNormals(bool b)
+{
+	m_drawNormals = b ;
+	updateGL() ;
+}
+
+void VDPMesh_App::slot_normalsSize(int i)
+{
+	normalScaleFactor = i / 50.0f ;
+	m_topoRender->updateData<PFP>(myMap, position, i / 100.0f, i / 100.0f) ;
+	updateGL() ;
+}
+
+/**********************************************************************************************
+ *                                      MAIN FUNCTION                                         *
+ **********************************************************************************************/
+
+int main(int argc, char **argv)
+{
+	QApplication app(argc, argv) ;
+
+	VDPMesh_App sqt ;
+	sqt.setGeometry(0, 0, 1000, 800) ;
+ 	sqt.show() ;
+
+	if(argc >= 2)
+	{
+		std::string filename(argv[1]) ;
+		sqt.importMesh(filename) ;
+		if(argc >= 3)
+		{
+			std::string filenameExp(argv[2]) ;
+			std::cout << "Exporting " << filename << " as " << filenameExp << " ... "<< std::flush ;
+			sqt.exportMesh(filenameExp, false) ;
+			std::cout << "done!" << std::endl ;
+
+			return (0) ;
+		}
+	}
+
+	sqt.initGUI() ;
+
+	return app.exec() ;
+}

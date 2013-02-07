@@ -1,7 +1,7 @@
 /*******************************************************************************
 * CGoGN: Combinatorial and Geometric modeling with Generic N-dimensional Maps  *
 * version 0.1                                                                  *
-* Copyright (C) 2009-2011, IGG Team, LSIIT, University of Strasbourg           *
+* Copyright (C) 2009, IGG Team, LSIIT, University of Strasbourg                *
 *                                                                              *
 * This library is free software; you can redistribute it and/or modify it      *
 * under the terms of the GNU Lesser General Public License as published by the *
@@ -21,65 +21,118 @@
 * Contact information: cgogn@unistra.fr                                        *
 *                                                                              *
 *******************************************************************************/
-#ifndef _VDPMesh_App_
-#define _VDPMesh_App_
+
+#include <iostream>
 
 #include "Utils/Qt/qtSimple.h"
 #include "ui_VDPMesh_App.h"
 #include "Utils/Qt/qtui.h"
 
 #include "Topology/generic/parameters.h"
-
 #include "Topology/map/embeddedMap2.h"
+
+#include "Geometry/vector_gen.h"
+#include "Geometry/matrix.h"
+
+#include "Algo/Import/import.h"
+#include "Algo/Export/export.h"
+
+#include "Algo/Render/GL2/mapRender.h"
 #include "Algo/Render/GL2/topoRender.h"
 
-#include "PMesh.h"
+#include "Utils/Shaders/shaderPhong.h"
+#include "Utils/Shaders/shaderFlat.h"
+#include "Utils/Shaders/shaderSimpleColor.h"
+#include "Utils/Shaders/shaderVectorPerVertex.h"
+#include "Utils/pointSprite.h"
+#include "Utils/text3d.h"
+#include "Utils/vbo.h"
 
-using namespace CGoGN;
+#include "Utils/Qt/qtInputs.h"
+
+#include "Algo/Geometry/boundingbox.h"
+#include "Algo/Geometry/normal.h"
+#include "Algo/Geometry/convexity.h"
+
+using namespace CGoGN ;
 
 struct PFP: public PFP_STANDARD
 {
-    typedef EmbeddedMap2 MAP;
+	// definition of the map
+	typedef EmbeddedMap2 MAP ;
 };
 
-typedef PFP::MAP MAP;
-typedef PFP::VEC3 VEC3;
+typedef PFP::MAP MAP ;
+typedef PFP::VEC3 VEC3 ;
 
-class VDPMesh_App: public Utils::QT::SimpleQT
+class VDPMesh_App : public Utils::QT::SimpleQT
 {
 	Q_OBJECT
-protected:
-    MAP m_map;
-    VertexAttribute<VEC3> position;
-    Algo::Render::GL2::TopoRender* m_render_topo;
 
 public:
+	MAP myMap ;
 
-	VDPMesh_App():m_render_topo(NULL) {}
+    Utils::QT::uiDockInterface dock;
 
-	~VDPMesh_App() {}
-    
-    void createMap();
+	enum renderMode { FLAT, PHONG } ;
 
-	void cb_initGL();
+	Geom::Vec4f colDif ;
+	Geom::Vec4f colSpec ;
+	Geom::Vec4f colClear ;
+	Geom::Vec4f colNormal ;
 
-	void cb_redraw();
+	float shininess ;
 
-	//void cb_mousePress(int button, int x, int y);
+	Geom::BoundingBox<PFP::VEC3> bb ;
+	float normalBaseSize ;
+	float normalScaleFactor ;
+	float vertexBaseSize ;
+	float vertexScaleFactor ;
+	float faceShrinkage ;
 
-	//void cb_mouseRelease(int button, int x, int y);
+	int m_renderStyle ;
+	bool m_drawVertices ;
+	bool m_drawEdges ;
+	bool m_drawFaces ;
+	bool m_drawNormals ;
+	bool m_drawTopo ;
 
-	//void cb_mouseClick(int button, int x, int y);
+	VertexAttribute<VEC3> position ;
+	VertexAttribute<VEC3> normal ;
 
-	//void cb_mouseMove(int buttons, int x, int y);
+	Algo::Render::GL2::MapRender* m_render ;
+	Algo::Render::GL2::TopoRender* m_topoRender ;
 
-	//void cb_wheelEvent(int delta, int x, int y);
+	Utils::VBO* m_positionVBO ;
+	Utils::VBO* m_normalVBO ;
 
-	//void cb_keyPress(int code);
+	Utils::ShaderPhong* m_phongShader ;
+	Utils::ShaderFlat* m_flatShader ;
+	Utils::ShaderVectorPerVertex* m_vectorShader ;
+	Utils::ShaderSimpleColor* m_simpleColorShader ;
+	Utils::PointSprite* m_pointSprite ;
 
-	//void cb_keyRelease(int code);
+	VDPMesh_App() ;
+
+	void initGUI() ;
+
+	void cb_initGL() ;
+	void cb_redraw() ;
+	void cb_Open() ;
+	void cb_Save() ;
+
+	void cb_keyPress(int keycode);
+
+	void importMesh(std::string& filename) ;
+	void exportMesh(std::string& filename, bool askExportMode = true);
 
 public slots:
+	void slot_drawVertices(bool b) ;
+	void slot_verticesSize(int i) ;
+	void slot_drawEdges(bool b) ;
+	void slot_drawFaces(bool b) ;
+	void slot_faceLighting(int i) ;
+	void slot_drawTopo(bool b) ;
+	void slot_drawNormals(bool b) ;
+	void slot_normalsSize(int i) ;
 };
-
-#endif
