@@ -6,16 +6,16 @@
  */
 class Node {
     public:
+        Node(VSplit& vsplit);
+        ~Node();
+    private:
         /*Liens dans l'arborescence*/
         Node* m_parent;
         Node* m_child_1;
         Node* m_child_2;
         
         /*Informations pour la transformation*/
-        Dart m_dart;        //Brin courant
-        Dart m_left_dart;   //Brin gauche du brin courant
-        Dart m_right_dart;  //Brin droit du brin courant
-    private:
+        VSplit& m_vsplit
     protected:
 };
 

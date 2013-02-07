@@ -23,9 +23,12 @@
 *******************************************************************************/
 #ifndef _VDPMesh_App_
 #define _VDPMesh_App_
+
 #include "Utils/Qt/qtSimple.h"
 #include "ui_VDPMesh_App.h"
 #include "Utils/Qt/qtui.h"
+
+#include "VDPMesh.h"
 
 using namespace CGoGN;
 
