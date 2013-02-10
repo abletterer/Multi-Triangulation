@@ -29,6 +29,7 @@
 #include "Utils/Qt/qtui.h"
 
 #include "Topology/generic/parameters.h"
+#include "Topology/generic/dartmarker.h"
 #include "Topology/map/embeddedMap2.h"
 
 #include "Geometry/vector_gen.h"
@@ -54,7 +55,10 @@
 #include "Algo/Geometry/normal.h"
 #include "Algo/Geometry/convexity.h"
 
+#include "PMesh.h"
+
 using namespace CGoGN ;
+using namespace CGoGN::Algo::Surface::PMesh ;
 
 struct PFP: public PFP_STANDARD
 {
@@ -111,6 +115,8 @@ public:
 	Utils::ShaderVectorPerVertex* m_vectorShader ;
 	Utils::ShaderSimpleColor* m_simpleColorShader ;
 	Utils::PointSprite* m_pointSprite ;
+    
+    ProgressiveMesh<PFP> m_pmesh;
 
 	VDPMesh_App() ;
 

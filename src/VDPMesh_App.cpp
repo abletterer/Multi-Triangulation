@@ -47,6 +47,10 @@ VDPMesh_App::VDPMesh_App() :
 	colSpec = Geom::Vec4f(0.9f, 0.9f, 0.9f, 1.0f) ;
 	colNormal = Geom::Vec4f(1.0f, 0.0f, 0.0f, 1.0f) ;
 	shininess = 80.0f ;
+
+    DartMarker* dm = new DartMarker(myMap);
+    m_pmesh = ProgressiveMesh<PFP>(myMap, dm, position)
+    m_pmesh = createPM(20);
 }
 
 void VDPMesh_App::initGUI()

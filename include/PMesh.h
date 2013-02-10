@@ -25,7 +25,7 @@
 #ifndef __PMESH__
 #define __PMESH__
 
-#include "Algo/ProgressiveMesh/vsplit.h"
+#include "VSplit.h"
 
 #include "Algo/Decimation/selector.h"
 #include "Algo/Decimation/edgeSelector.h"
