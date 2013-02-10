@@ -58,7 +58,6 @@
 #include "PMesh.h"
 
 using namespace CGoGN ;
-using namespace CGoGN::Algo::Surface::PMesh ;
 
 struct PFP: public PFP_STANDARD
 {
@@ -116,7 +115,7 @@ public:
 	Utils::ShaderSimpleColor* m_simpleColorShader ;
 	Utils::PointSprite* m_pointSprite ;
     
-    ProgressiveMesh<PFP> m_pmesh;
+    Algo::Surface::PMesh::ProgressiveMesh<PFP>* m_pmesh;
 
 	VDPMesh_App() ;
 

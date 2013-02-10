@@ -24,6 +24,8 @@
 
 #include "VDPMesh_App.h"
 
+using namespace CGoGN::Algo::Surface::PMesh;
+
 VDPMesh_App::VDPMesh_App() :
 	m_renderStyle(FLAT),
 	m_drawVertices(false),
@@ -47,10 +49,6 @@ VDPMesh_App::VDPMesh_App() :
 	colSpec = Geom::Vec4f(0.9f, 0.9f, 0.9f, 1.0f) ;
 	colNormal = Geom::Vec4f(1.0f, 0.0f, 0.0f, 1.0f) ;
 	shininess = 80.0f ;
-
-    DartMarker* dm = new DartMarker(myMap);
-    m_pmesh = ProgressiveMesh<PFP>(myMap, dm, position)
-    m_pmesh = createPM(20);
 }
 
 void VDPMesh_App::initGUI()
@@ -246,6 +244,12 @@ void VDPMesh_App::importMesh(std::string& filename)
 	normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
 	if(!normal.isValid())
 		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
+    
+    /*Création du maillage progressif*/
+    DartMarker dm(myMap);
+
+    m_pmesh = new ProgressiveMesh<PFP>(myMap, dm, position);
+    m_pmesh->createPM(20);
 
 	Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;
 

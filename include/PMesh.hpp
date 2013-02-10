@@ -100,6 +100,7 @@ void ProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	Dart d ;
 	while(!finished)
 	{
+        CGoGNout << "coucou" << CGoGNendl;
 		if(!m_selector->nextEdge(d))
 			break ;
 
