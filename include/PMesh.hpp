@@ -43,7 +43,7 @@ ProgressiveMesh<PFP>::ProgressiveMesh(
 	) :
 	m_map(map), positionsTable(position), inactiveMarker(inactive), dartSelect(inactiveMarker)
 {
-	CGoGNout << "  creating approximator and predictor.." << CGoGNflush ;
+	CGoGNout << "  creating approximator .." << CGoGNflush ;
 
 	std::vector<VertexAttribute< typename PFP::VEC3>* > pos_v ;
 	pos_v.push_back(&positionsTable) ;
