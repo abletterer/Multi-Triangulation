@@ -229,35 +229,12 @@ void VDPMesh_App::importMesh(std::string& filename)
 		position = myMap.getAttribute<PFP::VEC3, VERTEX>(attrNames[0]) ;
 	}
 
-	myMap.enableQuickTraversal<VERTEX>() ;
-
-	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::POINTS) ;
-	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::LINES) ;
-	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::TRIANGLES) ;
-
-	m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f) ;
-
-	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
-	normalBaseSize = bb.diagSize() / 100.0f ;
-//	vertexBaseSize = normalBaseSize / 5.0f ;
-
-	normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
-	if(!normal.isValid())
-		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
-    
-    /*Création du maillage progressif*/
     DartMarker dm(myMap);
 
     m_pmesh = new ProgressiveMesh<PFP>(myMap, dm, position);
-    m_pmesh->createPM(20);
+    m_pmesh->createPM(1);
 
-	Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;
-
-	m_positionVBO->updateData(position) ;
-	m_normalVBO->updateData(normal) ;
-
-	setParamObject(bb.maxSize(), bb.center().data()) ;
-	updateGLMatrices() ;
+    updateMesh();
 }
 
 void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
@@ -281,6 +258,32 @@ void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
 		myMap.saveMapBin(filename) ;
 	else
 		std::cerr << "Cannot save file " << filename << " : unknown or unhandled extension" << std::endl ;
+}
+
+void VDPMesh_App::updateMesh() {
+	myMap.enableQuickTraversal<VERTEX>() ;
+
+	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::POINTS) ;
+	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::LINES) ;
+	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::TRIANGLES) ;
+
+	m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f) ;
+
+	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
+	normalBaseSize = bb.diagSize() / 100.0f ;
+//	vertexBaseSize = normalBaseSize / 5.0f ;
+
+	normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
+	if(!normal.isValid())
+		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
+    
+	Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;
+
+	m_positionVBO->updateData(position) ;
+	m_normalVBO->updateData(normal) ;
+
+	setParamObject(bb.maxSize(), bb.center().data()) ;
+	updateGLMatrices() ;
 }
 
 void VDPMesh_App::slot_drawVertices(bool b)

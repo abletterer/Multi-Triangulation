@@ -100,7 +100,6 @@ void ProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	Dart d ;
 	while(!finished)
 	{
-        CGoGNout << "coucou" << CGoGNendl;
 		if(!m_selector->nextEdge(d))
 			break ;
 
@@ -122,7 +121,11 @@ void ProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 		edgeCollapse(vs) ;							// collapse edge
 
 		unsigned int newV = m_map.template setOrbitEmbeddingOnNewCell<VERTEX>(d2) ;
+		unsigned int newE1 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(d2) ;
+		unsigned int newE2 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(dd2) ;
 		vs->setApproxV(newV) ;
+		vs->setApproxE1(newE1) ;
+		vs->setApproxE2(newE2) ;
 
 		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 			(*it)->affectApprox(d2);				// affect data to the resulting vertex

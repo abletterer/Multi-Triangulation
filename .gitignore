@@ -4,6 +4,10 @@ bin/.*
 build/*
 build/.*
 !build/.gitkeep
+src/.*
+!src/.gitkeep
+include/.*
+!include/.gitkeep
 Debug/*
 !Debug/CMakeLists.txt
 Debug/.*
