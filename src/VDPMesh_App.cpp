@@ -62,9 +62,11 @@ void VDPMesh_App::initGUI()
 
     dock.slider_verticesSize->setVisible(false) ;
     dock.slider_normalsSize->setVisible(false) ;
+    dock.slider_vertexNumber->setEnabled(false);
 
     dock.slider_verticesSize->setSliderPosition(50) ;
     dock.slider_normalsSize->setSliderPosition(50) ;
+    dock.slider_vertexNumber->setSliderPosition(0);
 
 	setCallBack( dock.check_drawVertices, SIGNAL(toggled(bool)), SLOT(slot_drawVertices(bool)) ) ;
 	setCallBack( dock.slider_verticesSize, SIGNAL(valueChanged(int)), SLOT(slot_verticesSize(int)) ) ;
@@ -74,6 +76,7 @@ void VDPMesh_App::initGUI()
 	setCallBack( dock.check_drawTopo, SIGNAL(toggled(bool)), SLOT(slot_drawTopo(bool)) ) ;
 	setCallBack( dock.check_drawNormals, SIGNAL(toggled(bool)), SLOT(slot_drawNormals(bool)) ) ;
 	setCallBack( dock.slider_normalsSize, SIGNAL(valueChanged(int)), SLOT(slot_normalsSize(int)) ) ;
+    setCallBack( dock.slider_vertexNumber, SIGNAL(valueChanged(int)), SLOT(slot_vertexNumber(int)));
 }
 
 void VDPMesh_App::cb_initGL()
@@ -232,7 +235,9 @@ void VDPMesh_App::importMesh(std::string& filename)
     DartMarker dm(myMap);
 
     m_pmesh = new ProgressiveMesh<PFP>(myMap, dm, position);
-    m_pmesh->createPM(1);
+    m_pmesh->createPM(10);
+
+    dock.slider_vertexNumber->setEnabled(true);
 
     updateMesh();
 }
@@ -333,6 +338,16 @@ void VDPMesh_App::slot_normalsSize(int i)
 	normalScaleFactor = i / 50.0f ;
 	m_topoRender->updateData<PFP>(myMap, position, i / 100.0f, i / 100.0f) ;
 	updateGL() ;
+}
+
+void VDPMesh_App::slot_vertexNumber(int i)
+{
+    int level = m_pmesh->nbSplits()*(i/100.0f);
+    CGoGNout << "Level :" << level << CGoGNendl;
+    CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
+    m_pmesh->goToLevel(level);
+    updateMesh();
+    updateGL();
 }
 
 /**********************************************************************************************

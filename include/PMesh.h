@@ -92,7 +92,7 @@ public:
 	void coarsen() ;
 	void refine() ;
 
-	void gotoLevel(unsigned int goal) ;
+	void goToLevel(unsigned int goal) ;
 	unsigned int& currentLevel() { return m_cur ; }
 	unsigned int nbSplits() { return m_splits.size() ; }
 } ;

@@ -180,10 +180,13 @@ void ProgressiveMesh<PFP>::coarsen()
 	// Dart d = vs->getEdge() ;
 	// Dart dd = m_map.phi2(d) ;		// get some darts
 	Dart d2 = vs->getLeftEdge() ;
+	Dart dd2 = vs->getLeftEdge() ;
 
 	edgeCollapse(vs) ;	// collapse edge
 
 	m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV()) ;
+	m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1()) ;
+	m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2()) ;
 }
 
 template <typename PFP>
@@ -197,18 +200,30 @@ void ProgressiveMesh<PFP>::refine()
 
 	Dart d = vs->getEdge() ;
 	Dart dd = m_map.phi2(d) ; 		// get some darts
+	Dart dd2 = vs->getRightEdge() ;
+	Dart d2 = vs->getLeftEdge() ;
+	Dart d1 = m_map.phi2(d2) ;
+	Dart dd1 = m_map.phi2(dd2) ;
 
 	unsigned int v1 = m_map.template getEmbedding<VERTEX>(d) ;				// get the embedding
 	unsigned int v2 = m_map.template getEmbedding<VERTEX>(dd) ;			// of the new vertices
+	unsigned int e1 = m_map.template getEmbedding<EDGE>(m_map.phi1(d)) ;
+	unsigned int e2 = m_map.template getEmbedding<EDGE>(m_map.phi_1(d)) ;	// and new edges
+	unsigned int e3 = m_map.template getEmbedding<EDGE>(m_map.phi1(dd)) ;
+	unsigned int e4 = m_map.template getEmbedding<EDGE>(m_map.phi_1(dd)) ;
 
 	vertexSplit(vs) ; // split vertex
 
 	m_map.template setOrbitEmbedding<VERTEX>(d, v1) ;		// embed the
 	m_map.template setOrbitEmbedding<VERTEX>(dd, v2) ;	// new vertices
+	m_map.template setOrbitEmbedding<EDGE>(d1, e1) ;
+	m_map.template setOrbitEmbedding<EDGE>(d2, e2) ;		// and new edges
+	m_map.template setOrbitEmbedding<EDGE>(dd1, e3) ;
+	m_map.template setOrbitEmbedding<EDGE>(dd2, e4) ;
 }
 
 template <typename PFP>
-void ProgressiveMesh<PFP>::gotoLevel(unsigned int l)
+void ProgressiveMesh<PFP>::goToLevel(unsigned int l)
 {
 	if(l == m_cur || l > m_splits.size() || l < 0)
 		return ;

@@ -141,4 +141,5 @@ public slots:
 	void slot_drawTopo(bool b) ;
 	void slot_drawNormals(bool b) ;
 	void slot_normalsSize(int i) ;
+    void slot_vertexNumber(int i);
 };
