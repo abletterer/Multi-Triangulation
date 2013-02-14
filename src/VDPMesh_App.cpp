@@ -233,18 +233,18 @@ void VDPMesh_App::importMesh(std::string& filename)
 		}
 		position = myMap.getAttribute<PFP::VEC3, VERTEX>(attrNames[0]) ;
 	}
+	
+	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
+    
+    myMap.enableQuickTraversal<VERTEX>() ;
+
+    normalBaseSize = bb.diagSize() / 100.0f ;
+//	vertexBaseSize = normalBaseSize / 5.0f ;
 
     DartMarker dm(myMap);
 
     m_pmesh = new ProgressiveMesh<PFP>(myMap, dm, position);
     m_pmesh->createPM(max_level);
-    
-    myMap.enableQuickTraversal<VERTEX>() ;
-	
-	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
-
-    normalBaseSize = bb.diagSize() / 100.0f ;
-//	vertexBaseSize = normalBaseSize / 5.0f ;
 
     dock.slider_vertexNumber->setEnabled(true);
     dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
