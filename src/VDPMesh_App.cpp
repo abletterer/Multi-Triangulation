@@ -347,7 +347,7 @@ void VDPMesh_App::slot_normalsSize(int i)
 
 void VDPMesh_App::slot_vertexNumber(int i)
 {
-    int level = MyMap.getNbOrbits<VERTEX>()*(i/100.0f);
+    int level = myMap.getNbOrbits<VERTEX>()*(i/100.0f);
     CGoGNout << "Level :" << level << CGoGNendl;
     CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
     m_pmesh->goToLevel(m_pmesh->currentLevel()+level);
