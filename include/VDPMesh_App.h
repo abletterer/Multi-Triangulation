@@ -116,6 +116,7 @@ public:
 	Utils::PointSprite* m_pointSprite ;
     
     Algo::Surface::PMesh::ProgressiveMesh<PFP>* m_pmesh;
+    int max_level;
 
 	VDPMesh_App() ;
 
@@ -142,4 +143,6 @@ public slots:
 	void slot_drawNormals(bool b) ;
 	void slot_normalsSize(int i) ;
     void slot_vertexNumber(int i);
+    void slot_coarsen();
+    void slot_refine();
 };

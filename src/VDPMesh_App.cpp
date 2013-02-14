@@ -77,6 +77,8 @@ void VDPMesh_App::initGUI()
 	setCallBack( dock.check_drawNormals, SIGNAL(toggled(bool)), SLOT(slot_drawNormals(bool)) ) ;
 	setCallBack( dock.slider_normalsSize, SIGNAL(valueChanged(int)), SLOT(slot_normalsSize(int)) ) ;
     setCallBack( dock.slider_vertexNumber, SIGNAL(valueChanged(int)), SLOT(slot_vertexNumber(int)));
+    setCallBack( dock.pushButton_coarsen, SIGNAL(clicked()), SLOT(slot_coarsen()));
+    setCallBack( dock.pushButton_refine, SIGNAL(clicked()), SLOT(slot_refine()));
 }
 
 void VDPMesh_App::cb_initGL()
@@ -231,13 +233,21 @@ void VDPMesh_App::importMesh(std::string& filename)
 		}
 		position = myMap.getAttribute<PFP::VEC3, VERTEX>(attrNames[0]) ;
 	}
+	
+	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
+    
+    myMap.enableQuickTraversal<VERTEX>() ;
+
+    normalBaseSize = bb.diagSize() / 100.0f ;
+//	vertexBaseSize = normalBaseSize / 5.0f ;
 
     DartMarker dm(myMap);
 
     m_pmesh = new ProgressiveMesh<PFP>(myMap, dm, position);
-    m_pmesh->createPM(10);
+    m_pmesh->createPM(max_level);
 
     dock.slider_vertexNumber->setEnabled(true);
+    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
 
     updateMesh();
 }
@@ -266,17 +276,11 @@ void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
 }
 
 void VDPMesh_App::updateMesh() {
-	myMap.enableQuickTraversal<VERTEX>() ;
-
 	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::POINTS) ;
 	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::LINES) ;
 	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::TRIANGLES) ;
-
+	
 	m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f) ;
-
-	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
-	normalBaseSize = bb.diagSize() / 100.0f ;
-//	vertexBaseSize = normalBaseSize / 5.0f ;
 
 	normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
 	if(!normal.isValid())
@@ -296,6 +300,7 @@ void VDPMesh_App::slot_drawVertices(bool b)
 	m_drawVertices = b ;
 	updateGL() ;
 }
+
 
 void VDPMesh_App::slot_verticesSize(int i)
 {
@@ -342,10 +347,30 @@ void VDPMesh_App::slot_normalsSize(int i)
 
 void VDPMesh_App::slot_vertexNumber(int i)
 {
-    int level = m_pmesh->nbSplits()*(i/100.0f);
+    int level = MyMap.getNbOrbits<VERTEX>()*(i/100.0f);
     CGoGNout << "Level :" << level << CGoGNendl;
     CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
-    m_pmesh->goToLevel(level);
+    m_pmesh->goToLevel(m_pmesh->currentLevel()+level);
+    CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
+    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
+    updateMesh();
+    updateGL();
+}
+
+void VDPMesh_App::slot_coarsen() 
+{
+    m_pmesh->coarsen();
+    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
+    CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
+    updateMesh();
+    updateGL();
+}
+
+void VDPMesh_App::slot_refine() 
+{
+    m_pmesh->refine();
+    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
+    CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
     updateMesh();
     updateGL();
 }
@@ -361,14 +386,18 @@ int main(int argc, char **argv)
 	VDPMesh_App sqt ;
 	sqt.setGeometry(0, 0, 1000, 800) ;
  	sqt.show() ;
+    if(argc==2)
+        sqt.max_level = atoi(argv[1]);
+    else
+        sqt.max_level = 50;
 
-	if(argc >= 2)
+	if(argc >= 3)
 	{
-		std::string filename(argv[1]) ;
+		std::string filename(argv[2]) ;
 		sqt.importMesh(filename) ;
-		if(argc >= 3)
+		if(argc >= 4)
 		{
-			std::string filenameExp(argv[2]) ;
+			std::string filenameExp(argv[3]) ;
 			std::cout << "Exporting " << filename << " as " << filenameExp << " ... "<< std::flush ;
 			sqt.exportMesh(filenameExp, false) ;
 			std::cout << "done!" << std::endl ;
