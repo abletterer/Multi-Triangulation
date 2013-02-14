@@ -146,6 +146,4 @@ public slots:
 	void slot_normalsSize(int i) ;
     void slot_vertexNumber(int i);
     void slot_createPM();
-    void slot_coarsen();
-    void slot_refine();
 };

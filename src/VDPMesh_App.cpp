@@ -71,6 +71,10 @@ void VDPMesh_App::initGUI()
     dock.slider_normalsSize->setSliderPosition(50) ;
     dock.slider_vertexNumber->setSliderPosition(0);
 
+    QIntValidator* validator = new QIntValidator();
+    validator->setRange(0,100);
+    dock.lineEdit_pourcent->setValidator(validator);
+
 	setCallBack( dock.check_drawVertices, SIGNAL(toggled(bool)), SLOT(slot_drawVertices(bool)) ) ;
 	setCallBack( dock.slider_verticesSize, SIGNAL(valueChanged(int)), SLOT(slot_verticesSize(int)) ) ;
 	setCallBack( dock.check_drawEdges, SIGNAL(toggled(bool)), SLOT(slot_drawEdges(bool)) ) ;
@@ -81,8 +85,6 @@ void VDPMesh_App::initGUI()
 	setCallBack( dock.slider_normalsSize, SIGNAL(valueChanged(int)), SLOT(slot_normalsSize(int)) ) ;
     setCallBack( dock.slider_vertexNumber, SIGNAL(valueChanged(int)), SLOT(slot_vertexNumber(int)));
     setCallBack( dock.pushButton_createPM, SIGNAL(clicked()), SLOT(slot_createPM()));
-    setCallBack( dock.pushButton_coarsen, SIGNAL(clicked()), SLOT(slot_coarsen()));
-    setCallBack( dock.pushButton_refine, SIGNAL(clicked()), SLOT(slot_refine()));
 }
 
 void VDPMesh_App::cb_initGL()
@@ -345,39 +347,21 @@ void VDPMesh_App::slot_normalsSize(int i)
 
 void VDPMesh_App::slot_vertexNumber(int i)
 {
-    int level = myMap.getNbOrbits<VERTEX>()*(i/100.0f);
-    CGoGNout << "Level :" << level << CGoGNendl;
-    CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
-    m_pmesh->goToLevel(m_pmesh->currentLevel()+level);
-    CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
-    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
+    int level = m_pmesh->nbSplits()*(1-i/100.0f);
+    m_pmesh->goToLevel(level);
     updateMesh();
 }
 
 void VDPMesh_App::slot_createPM() {
     m_pmesh = new ProgressiveMesh<PFP>(myMap, m_inactiveMarker, position);
 
-    m_pmesh->createPM(max_level);
+    m_pmesh->createPM(dock.lineEdit_pourcent->text().toInt());
 
     dock.slider_vertexNumber->setEnabled(true);
-    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
+    dock.slider_vertexNumber->setSliderPosition(100);
+    dock.pushButton_createPM->setEnabled(false);
+    dock.lineEdit_pourcent->setEnabled(false);
 	
-    updateMesh();
-}
-
-void VDPMesh_App::slot_coarsen() 
-{
-    m_pmesh->coarsen();
-    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
-    CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
-    updateMesh();
-}
-
-void VDPMesh_App::slot_refine() 
-{
-    m_pmesh->refine();
-    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
-    CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
     updateMesh();
 }
 
@@ -392,18 +376,14 @@ int main(int argc, char **argv)
 	VDPMesh_App sqt ;
 	sqt.setGeometry(0, 0, 1000, 800) ;
  	sqt.show() ;
-    if(argc==2)
-        sqt.max_level = atoi(argv[1]);
-    else
-        sqt.max_level = 50;
 
-	if(argc >= 3)
+	if(argc >= 2)
 	{
-		std::string filename(argv[2]) ;
+		std::string filename(argv[1]) ;
 		sqt.importMesh(filename) ;
-		if(argc >= 4)
+		if(argc >= 3)
 		{
-			std::string filenameExp(argv[3]) ;
+			std::string filenameExp(argv[2]) ;
 			std::cout << "Exporting " << filename << " as " << filenameExp << " ... "<< std::flush ;
 			sqt.exportMesh(filenameExp, false) ;
 			std::cout << "done!" << std::endl ;
