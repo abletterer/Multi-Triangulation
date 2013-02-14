@@ -38,7 +38,7 @@ namespace PMesh
 
 template <typename PFP>
 ProgressiveMesh<PFP>::ProgressiveMesh(
-		MAP& map, DartMarker inactive,
+		MAP& map, DartMarker& inactive,
 		VertexAttribute<typename PFP::VEC3>& position
 	) :
 	m_map(map), positionsTable(position), inactiveMarker(inactive), dartSelect(inactiveMarker)
@@ -164,8 +164,6 @@ void ProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 
 	m_map.insertTrianglePair(d, d2, dd2) ;
 
-    inactiveMarker.markOrbit<FACE>(d) ;
-	CGoGNout << "Test" << CGoGNendl;
 	inactiveMarker.unmarkOrbit<FACE>(d) ;
 	inactiveMarker.unmarkOrbit<FACE>(dd) ;
 }
