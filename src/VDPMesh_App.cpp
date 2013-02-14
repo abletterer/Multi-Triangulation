@@ -38,7 +38,8 @@ VDPMesh_App::VDPMesh_App() :
 	m_flatShader(NULL),
 	m_vectorShader(NULL),
 	m_simpleColorShader(NULL),
-	m_pointSprite(NULL)
+	m_pointSprite(NULL),
+    m_inactiveMarker(myMap)
 {
 	normalScaleFactor = 1.0f ;
 	vertexScaleFactor = 0.1f ;
@@ -49,6 +50,8 @@ VDPMesh_App::VDPMesh_App() :
 	colSpec = Geom::Vec4f(0.9f, 0.9f, 0.9f, 1.0f) ;
 	colNormal = Geom::Vec4f(1.0f, 0.0f, 0.0f, 1.0f) ;
 	shininess = 80.0f ;
+
+    m_selectorMarked = new SelectorUnmarked(m_inactiveMarker);
 }
 
 void VDPMesh_App::initGUI()
@@ -77,6 +80,7 @@ void VDPMesh_App::initGUI()
 	setCallBack( dock.check_drawNormals, SIGNAL(toggled(bool)), SLOT(slot_drawNormals(bool)) ) ;
 	setCallBack( dock.slider_normalsSize, SIGNAL(valueChanged(int)), SLOT(slot_normalsSize(int)) ) ;
     setCallBack( dock.slider_vertexNumber, SIGNAL(valueChanged(int)), SLOT(slot_vertexNumber(int)));
+    setCallBack( dock.pushButton_createPM, SIGNAL(clicked()), SLOT(slot_createPM()));
     setCallBack( dock.pushButton_coarsen, SIGNAL(clicked()), SLOT(slot_coarsen()));
     setCallBack( dock.pushButton_refine, SIGNAL(clicked()), SLOT(slot_refine()));
 }
@@ -236,18 +240,16 @@ void VDPMesh_App::importMesh(std::string& filename)
 	
 	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
     
-    myMap.enableQuickTraversal<VERTEX>() ;
 
     normalBaseSize = bb.diagSize() / 100.0f ;
 //	vertexBaseSize = normalBaseSize / 5.0f ;
 
-    DartMarker dm(myMap);
+    normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
+	if(!normal.isValid())
+		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
 
-    m_pmesh = new ProgressiveMesh<PFP>(myMap, dm, position);
-    m_pmesh->createPM(max_level);
-
-    dock.slider_vertexNumber->setEnabled(true);
-    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
+	setParamObject(bb.maxSize(), bb.center().data()) ;
+	updateGLMatrices() ;
 
     updateMesh();
 }
@@ -276,23 +278,19 @@ void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
 }
 
 void VDPMesh_App::updateMesh() {
-	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::POINTS) ;
-	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::LINES) ;
-	m_render->initPrimitives<PFP>(myMap, allDarts, Algo::Render::GL2::TRIANGLES) ;
+    //Pas allDarts, utilisation selector
+	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::POINTS) ;
+	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::LINES) ;
+	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::TRIANGLES) ;
 	
 	m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f) ;
-
-	normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
-	if(!normal.isValid())
-		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
     
 	Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;
 
 	m_positionVBO->updateData(position) ;
 	m_normalVBO->updateData(normal) ;
-
-	setParamObject(bb.maxSize(), bb.center().data()) ;
-	updateGLMatrices() ;
+    
+    updateGL();
 }
 
 void VDPMesh_App::slot_drawVertices(bool b)
@@ -354,7 +352,17 @@ void VDPMesh_App::slot_vertexNumber(int i)
     CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
     dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
     updateMesh();
-    updateGL();
+}
+
+void VDPMesh_App::slot_createPM() {
+    m_pmesh = new ProgressiveMesh<PFP>(myMap, m_inactiveMarker, position);
+
+    m_pmesh->createPM(max_level);
+
+    dock.slider_vertexNumber->setEnabled(true);
+    dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
+	
+    updateMesh();
 }
 
 void VDPMesh_App::slot_coarsen() 
@@ -363,7 +371,6 @@ void VDPMesh_App::slot_coarsen()
     dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
     CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
     updateMesh();
-    updateGL();
 }
 
 void VDPMesh_App::slot_refine() 
@@ -372,7 +379,6 @@ void VDPMesh_App::slot_refine()
     dock.label_currentLevel->setText(QString::number(m_pmesh->currentLevel()));
     CGoGNout << "Current level :" << m_pmesh->currentLevel() << CGoGNendl;
     updateMesh();
-    updateGL();
 }
 
 /**********************************************************************************************

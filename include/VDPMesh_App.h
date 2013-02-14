@@ -115,6 +115,8 @@ public:
 	Utils::ShaderSimpleColor* m_simpleColorShader ;
 	Utils::PointSprite* m_pointSprite ;
     
+    DartMarker m_inactiveMarker;
+    SelectorUnmarked* m_selectorMarked;
     Algo::Surface::PMesh::ProgressiveMesh<PFP>* m_pmesh;
     int max_level;
 
@@ -143,6 +145,7 @@ public slots:
 	void slot_drawNormals(bool b) ;
 	void slot_normalsSize(int i) ;
     void slot_vertexNumber(int i);
+    void slot_createPM();
     void slot_coarsen();
     void slot_refine();
 };
