@@ -55,7 +55,7 @@
 #include "Algo/Geometry/normal.h"
 #include "Algo/Geometry/convexity.h"
 
-#include "PMesh.h"
+#include "VDPMesh.h"
 
 using namespace CGoGN ;
 
