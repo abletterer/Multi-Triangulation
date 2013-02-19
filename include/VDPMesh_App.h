@@ -56,6 +56,7 @@
 #include "Algo/Geometry/convexity.h"
 
 #include "VDPMesh.h"
+#include "Node.h"
 
 using namespace CGoGN ;
 
@@ -102,6 +103,7 @@ public:
 
 	VertexAttribute<VEC3> position ;
 	VertexAttribute<VEC3> normal ;
+    VertexAttribute<Algo::Surface::Node> noeud ;
 
 	Algo::Render::GL2::MapRender* m_render ;
 	Algo::Render::GL2::TopoRender* m_topoRender ;
@@ -117,7 +119,7 @@ public:
     
     DartMarker m_inactiveMarker;
     SelectorUnmarked* m_selectorMarked;
-    Algo::Surface::PMesh::ProgressiveMesh<PFP>* m_pmesh;
+    Algo::Surface::VDPMesh::VDProgressiveMesh<PFP>* m_pmesh;
     int max_level;
 
 	VDPMesh_App() ;

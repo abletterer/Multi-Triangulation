@@ -24,7 +24,7 @@
 
 #include "VDPMesh_App.h"
 
-using namespace CGoGN::Algo::Surface::PMesh;
+using namespace CGoGN::Algo::Surface::VDPMesh;
 
 VDPMesh_App::VDPMesh_App() :
 	m_renderStyle(FLAT),
@@ -249,6 +249,10 @@ void VDPMesh_App::importMesh(std::string& filename)
     normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
 	if(!normal.isValid())
 		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
+    
+    noeud = myMap.getAttribute<Algo::Surface::Node, VERTEX>("noeud") ;
+	if(!noeud.isValid())
+		noeud = myMap.addAttribute<Algo::Surface::Node, VERTEX>("noeud") ;
 
 	setParamObject(bb.maxSize(), bb.center().data()) ;
 	updateGLMatrices() ;
@@ -347,13 +351,15 @@ void VDPMesh_App::slot_normalsSize(int i)
 
 void VDPMesh_App::slot_vertexNumber(int i)
 {
+    /*
     int level = m_pmesh->nbSplits()*(1-i/100.0f);
     m_pmesh->goToLevel(level);
     updateMesh();
+    */
 }
 
 void VDPMesh_App::slot_createPM() {
-    m_pmesh = new ProgressiveMesh<PFP>(myMap, m_inactiveMarker, position);
+    m_pmesh = new VDProgressiveMesh<PFP>(myMap, m_inactiveMarker, position);
 
     m_pmesh->createPM(dock.lineEdit_pourcent->text().toInt());
 

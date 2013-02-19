@@ -65,7 +65,7 @@ private:
 	Algo::Surface::Decimation::EdgeSelector<PFP>* m_selector ;
 	std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*> m_approximators ;
 	std::vector<VSplit<PFP>*> m_splits ;
-	unsigned int m_cur ;
+	//unsigned int m_cur ;
 
 	Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionApproximator ;
 
@@ -80,6 +80,8 @@ public:
 
 	bool initOk() { return m_initOk ; }
 
+    void addNodes() ;
+
 	void createPM(unsigned int percentWantedVertices) ;
 
 	std::vector<VSplit<PFP>*>& splits() { return m_splits ; }
@@ -92,8 +94,6 @@ public:
 	void coarsen() ;
 	void refine() ;
 
-	void goToLevel(unsigned int goal) ;
-	unsigned int& currentLevel() { return m_cur ; }
 	unsigned int nbSplits() { return m_splits.size() ; }
 } ;
 
@@ -105,6 +105,6 @@ public:
 
 } //namespace CGoGN
 
-#include "PMesh.hpp"
+#include "VDPMesh.hpp"
 
 #endif

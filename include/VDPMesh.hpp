@@ -90,6 +90,10 @@ VDProgressiveMesh<PFP>::~VDProgressiveMesh()
 }
 
 template <typename PFP>
+void VDProgressiveMesh<PFP>::addNodes() {
+}
+
+template <typename PFP>
 void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 {
 	unsigned int nbVertices = m_map.template getNbOrbits<VERTEX>() ;
@@ -138,7 +142,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	delete m_selector ;
 	m_selector = NULL ;
 
-	m_cur = m_splits.size() ;
 	CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
 }
 
@@ -171,11 +174,13 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen()
 {
-	if(m_cur == m_splits.size())
+	/*
+    if(m_cur == m_splits.size())
 		return ;
 
 	VSplit<PFP>* vs = m_splits[m_cur] ; // get the split node
 	++m_cur ;
+    
 
 	// Dart d = vs->getEdge() ;
 	// Dart dd = m_map.phi2(d) ;		// get some darts
@@ -187,12 +192,14 @@ void VDProgressiveMesh<PFP>::coarsen()
 	m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV()) ;
 	m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1()) ;
 	m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2()) ;
+    */
 }
 
 template <typename PFP>
 void VDProgressiveMesh<PFP>::refine()
 {
-	if(m_cur == 0)
+	/*
+    if(m_cur == 0)
 		return ;
 
 	--m_cur ;
@@ -220,20 +227,7 @@ void VDProgressiveMesh<PFP>::refine()
 	m_map.template setOrbitEmbedding<EDGE>(d2, e2) ;		// and new edges
 	m_map.template setOrbitEmbedding<EDGE>(dd1, e3) ;
 	m_map.template setOrbitEmbedding<EDGE>(dd2, e4) ;
-}
-
-template <typename PFP>
-void VDProgressiveMesh<PFP>::goToLevel(unsigned int l)
-{
-	if(l == m_cur || l > m_splits.size() || l < 0)
-		return ;
-
-	if(l > m_cur)
-		while(m_cur != l)
-			coarsen() ;
-	else
-		while(m_cur != l)
-			refine() ;
+    */
 }
 
 } // namespace VDPMesh

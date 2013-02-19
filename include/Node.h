@@ -9,8 +9,6 @@ namespace Algo {
 
 namespace Surface {
 
-namespace VDPMesh {
-
 struct PFP: public PFP_STANDARD
 {
     typedef EmbeddedMap2 MAP;
@@ -35,22 +33,31 @@ class Node {
 
         Node* getChild_2() { return m_child_2; }
         void setChild_2(Node* child_2) { m_child_2 = child_2; }
+        
+        Node* getNeighbor() { return m_neighbor; }
+        void setNeighbor(Node* neighbor) { m_neighbor = neighbor; }
 
         VSplit<PFP>* getVSplit() { return m_vsplit; }
         void setVSplit(VSplit<PFP>* vsplit) { m_vsplit = vsplit; }
+
+        bool isActive() { return m_active; } 
+        void setActive(bool active) { m_active = active; }
+        
+	    static std::string CGoGNnameOfType() { return "Noeud"; } 
+
     private:
         /*Liens dans l'arborescence*/
         Node* m_parent;
         Node* m_child_1;
         Node* m_child_2;
+        Node* m_neighbor;
         
         /*Informations pour la transformation*/
         VSplit<PFP>* m_vsplit;
-    protected:
+        bool m_active;
 };
-}
-}
-}
-}
+}//namespace Surface
+}//namespace Algo
+}//namespace CGoGN
 
 #endif
