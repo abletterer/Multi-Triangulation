@@ -35,7 +35,7 @@ namespace Surface
 
 namespace VDPMesh
 {
-
+    
 template <typename PFP>
 VDProgressiveMesh<PFP>::VDProgressiveMesh(
 		MAP& map, DartMarker& inactive,
@@ -75,6 +75,8 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
 
 	m_initOk = m_selector->init() ;
 
+    noeud = m_map.template getAttribute<EmbNode, VERTEX>("noeud");
+
 	CGoGNout << "..done" << CGoGNendl ;
 }
 
@@ -91,11 +93,10 @@ VDProgressiveMesh<PFP>::~VDProgressiveMesh()
 
 template <typename PFP>
 void VDProgressiveMesh<PFP>::addNodes() {
-    /*VertexAttribute noeud = m_map.getAttribute<EmbNode, VERTEX>("noeud");
     AttributeContainer container = m_map.template getAttributeContainer<VERTEX>();
     for(unsigned int i = container.begin(); i!=container.end(); container.next(i)) {
         noeud[i] = new Node();
-    }*/
+    }
 }
 
 template <typename PFP>
@@ -117,7 +118,29 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 		Dart dd2 = m_map.phi2(m_map.phi_1(m_map.phi2(d))) ;
 
 		VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, dd2, d2) ;	// create new VSplit node
-		m_splits.push_back(vs) ;								// and store it
+        
+        noeud[d].node->setVSplit(vs);
+
+        //Mise en place de la hiérarchie de la forêt
+        noeud[d].node->setLeftChild(noeud[d2].node);
+        noeud[d2].node->setParent(noeud[d].node);
+        noeud[d].node->setRightChild(noeud[dd2].node);
+        noeud[dd2].node->setParent(noeud[d].node);
+
+        if(noeud[d2].node->isActive() || noeud[dd2].node->isActive()) {
+            //On enlève les anciens sommets du front
+            if(noeud[d2].node->isActive()) {
+                m_splits.remove(noeud[d2].node->getVSplit());
+                noeud[d2].node->setActive(false);
+            }
+            if(noeud[dd2].node->isActive()) {
+                m_splits.remove(noeud[dd2].node->getVSplit());
+                noeud[dd2].node->setActive(false);
+            }
+        }
+
+        noeud[d].node->setActive(true);
+		m_splits.push_back(vs);
 
 		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 		{

@@ -28,15 +28,12 @@ struct Node {
         Node* getParent() { return m_parent; }
         void setParent(Node* parent) { m_parent = parent; }
 
-        Node* getChild_1() { return m_child_1; }
-        void setChild_1(Node* child_1) { m_child_1 = child_1; }
+        Node* getLeftChild() { return m_child_left; }
+        void setLeftChild(Node* child_left) { m_child_left = child_left; }
 
-        Node* getChild_2() { return m_child_2; }
-        void setChild_2(Node* child_2) { m_child_2 = child_2; }
+        Node* getRightChild() { return m_child_right; }
+        void setRightChild(Node* child_right) { m_child_right = child_right; }
         
-        Node* getNeighbor() { return m_neighbor; }
-        void setNeighbor(Node* neighbor) { m_neighbor = neighbor; }
-
         VSplit<PFP>* getVSplit() { return m_vsplit; }
         void setVSplit(VSplit<PFP>* vsplit) { m_vsplit = vsplit; }
 
@@ -46,9 +43,8 @@ struct Node {
     private:
         /*Liens dans l'arborescence*/
         Node* m_parent;
-        Node* m_child_1;
-        Node* m_child_2;
-        Node* m_neighbor;
+        Node* m_child_left;
+        Node* m_child_right;
         
         /*Informations pour la transformation*/
         VSplit<PFP>* m_vsplit;
@@ -57,7 +53,7 @@ struct Node {
 
 typedef struct
 {
-    Algo::Surface::Node* it;
+    Node* node;
     static std::string CGoGNnameOfType() { return "NodeInfo" ; }
 } NodeInfo;
 

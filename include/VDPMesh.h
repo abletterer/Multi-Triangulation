@@ -34,6 +34,7 @@
 #include "Algo/Decimation/colorPerVertexApproximator.h"
 
 #include "Utils/quantization.h"
+#include "Node.h"
 
 namespace CGoGN
 {
@@ -54,17 +55,21 @@ public:
 	typedef typename PFP::MAP MAP ;
 	typedef typename PFP::VEC3 VEC3 ;
 	typedef typename PFP::REAL REAL ;
+    
 
 private:
 	MAP& m_map ;
 	VertexAttribute<typename PFP::VEC3>& positionsTable ;
+    
+    typedef NoMathIOAttribute<Algo::Surface::NodeInfo> EmbNode;
+    VertexAttribute<EmbNode> noeud;
 
 	DartMarker& inactiveMarker ;
 	SelectorUnmarked dartSelect ;
 
 	Algo::Surface::Decimation::EdgeSelector<PFP>* m_selector ;
 	std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*> m_approximators ;
-	std::vector<VSplit<PFP>*> m_splits ;
+	std::list<VSplit<PFP>*> m_splits ;
 	//unsigned int m_cur ;
 
 	Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionApproximator ;

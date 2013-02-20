@@ -95,6 +95,11 @@ public:
 		if(id != EMBNULL) cont.refLine(id) ;
 		approxEdgeId2 = id ;
 	}
+
+    bool operator==(const VSplit& vs) 
+    {
+        return edge==vs.edge && left_edge==vs.left_edge && right_edge==vs.right_edge;
+    }
 } ;
 
 } // Surface
