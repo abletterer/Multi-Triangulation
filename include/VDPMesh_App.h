@@ -68,7 +68,7 @@ struct PFP: public PFP_STANDARD
 typedef PFP::MAP MAP ;
 typedef PFP::VEC3 VEC3 ;
 
-class PMesh_App : public Utils::QT::SimpleQT
+class VDPMesh_App : public Utils::QT::SimpleQT
 {
 	Q_OBJECT
 
@@ -120,7 +120,7 @@ public:
     Algo::Surface::PMesh::ProgressiveMesh<PFP>* m_pmesh;
     int max_level;
 
-	PMesh_App() ;
+	VDPMesh_App() ;
 
 	void initGUI() ;
 

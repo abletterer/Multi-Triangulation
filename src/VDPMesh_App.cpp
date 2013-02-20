@@ -22,11 +22,11 @@
 *                                                                              *
 *******************************************************************************/
 
-#include "PMesh_App.h"
+#include "VDPMesh_App.h"
 
 using namespace CGoGN::Algo::Surface::PMesh;
 
-PMesh_App::PMesh_App() :
+VDPMesh_App::VDPMesh_App() :
 	m_renderStyle(FLAT),
 	m_drawVertices(false),
 	m_drawEdges(false),
@@ -54,7 +54,7 @@ PMesh_App::PMesh_App() :
     m_selectorMarked = new SelectorUnmarked(m_inactiveMarker);
 }
 
-void PMesh_App::initGUI()
+void VDPMesh_App::initGUI()
 {
     setDock(&dock) ;
 
@@ -87,7 +87,7 @@ void PMesh_App::initGUI()
     setCallBack( dock.pushButton_createPM, SIGNAL(clicked()), SLOT(slot_createPM()));
 }
 
-void PMesh_App::cb_initGL()
+void VDPMesh_App::cb_initGL()
 {
 	Utils::GLSLShader::setCurrentOGLVersion(2) ;
 
@@ -135,7 +135,7 @@ void PMesh_App::cb_initGL()
 	registerShader(m_pointSprite) ;
 }
 
-void PMesh_App::cb_redraw()
+void VDPMesh_App::cb_redraw()
 {
 	if(m_drawVertices)
 	{
@@ -185,7 +185,7 @@ void PMesh_App::cb_redraw()
 	}
 }
 
-void PMesh_App::cb_Open()
+void VDPMesh_App::cb_Open()
 {
 	std::string filters("all (*.*);; trian (*.trian);; ctm (*.ctm);; off (*.off);; ply (*.ply)") ;
 	std::string filename = selectFile("Open Mesh", "", filters) ;
@@ -196,7 +196,7 @@ void PMesh_App::cb_Open()
 	updateGL() ;
 }
 
-void PMesh_App::cb_Save()
+void VDPMesh_App::cb_Save()
 {
 	std::string filters("all (*.*);; map (*.map);; off (*.off);; ply (*.ply)") ;
 	std::string filename = selectFileSave("Save Mesh", "", filters) ;
@@ -205,7 +205,7 @@ void PMesh_App::cb_Save()
 		exportMesh(filename) ;
 }
 
-void PMesh_App::cb_keyPress(int keycode)
+void VDPMesh_App::cb_keyPress(int keycode)
 {
     switch(keycode)
     {
@@ -217,7 +217,7 @@ void PMesh_App::cb_keyPress(int keycode)
     }
 }
 
-void PMesh_App::importMesh(std::string& filename)
+void VDPMesh_App::importMesh(std::string& filename)
 {
 	myMap.clear(true) ;
 
@@ -256,7 +256,7 @@ void PMesh_App::importMesh(std::string& filename)
     updateMesh();
 }
 
-void PMesh_App::exportMesh(std::string& filename, bool askExportMode)
+void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
 {
 	size_t pos = filename.rfind(".") ;    // position of "." in filename
 	std::string extension = filename.substr(pos) ;
@@ -279,7 +279,7 @@ void PMesh_App::exportMesh(std::string& filename, bool askExportMode)
 		std::cerr << "Cannot save file " << filename << " : unknown or unhandled extension" << std::endl ;
 }
 
-void PMesh_App::updateMesh() {
+void VDPMesh_App::updateMesh() {
     //Pas allDarts, utilisation selector
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::POINTS) ;
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::LINES) ;
@@ -295,64 +295,64 @@ void PMesh_App::updateMesh() {
     updateGL();
 }
 
-void PMesh_App::slot_drawVertices(bool b)
+void VDPMesh_App::slot_drawVertices(bool b)
 {
 	m_drawVertices = b ;
 	updateGL() ;
 }
 
 
-void PMesh_App::slot_verticesSize(int i)
+void VDPMesh_App::slot_verticesSize(int i)
 {
 	vertexScaleFactor = i / 500.0f ;
 	updateGL() ;
 }
 
-void PMesh_App::slot_drawEdges(bool b)
+void VDPMesh_App::slot_drawEdges(bool b)
 {
 	m_drawEdges = b ;
 	updateGL() ;
 }
 
-void PMesh_App::slot_drawFaces(bool b)
+void VDPMesh_App::slot_drawFaces(bool b)
 {
 	m_drawFaces = b ;
 	updateGL() ;
 }
 
-void PMesh_App::slot_faceLighting(int i)
+void VDPMesh_App::slot_faceLighting(int i)
 {
 	m_renderStyle = i ;
 	updateGL() ;
 }
 
-void PMesh_App::slot_drawTopo(bool b)
+void VDPMesh_App::slot_drawTopo(bool b)
 {
 	m_drawTopo = b ;
 	updateGL() ;
 }
 
-void PMesh_App::slot_drawNormals(bool b)
+void VDPMesh_App::slot_drawNormals(bool b)
 {
 	m_drawNormals = b ;
 	updateGL() ;
 }
 
-void PMesh_App::slot_normalsSize(int i)
+void VDPMesh_App::slot_normalsSize(int i)
 {
 	normalScaleFactor = i / 50.0f ;
 	m_topoRender->updateData<PFP>(myMap, position, i / 100.0f, i / 100.0f) ;
 	updateGL() ;
 }
 
-void PMesh_App::slot_vertexNumber(int i)
+void VDPMesh_App::slot_vertexNumber(int i)
 {
     int level = m_pmesh->nbSplits()*(1-i/100.0f);
     m_pmesh->goToLevel(level);
     updateMesh();
 }
 
-void PMesh_App::slot_createPM() {
+void VDPMesh_App::slot_createPM() {
     m_pmesh = new ProgressiveMesh<PFP>(myMap, m_inactiveMarker, position);
 
     m_pmesh->createPM(dock.lineEdit_pourcent->text().toInt());
@@ -373,7 +373,7 @@ int main(int argc, char **argv)
 {
 	QApplication app(argc, argv) ;
 
-	PMesh_App sqt ;
+	VDPMesh_App sqt ;
 	sqt.setGeometry(0, 0, 1000, 800) ;
  	sqt.show() ;
 
