@@ -20,7 +20,7 @@ typedef PFP::VEC3 VEC3;
 /*
  * Classe définissant les différents noeuds de l'arbre des maillages progressifs
  */
-class Node {
+struct Node {
     public:
         Node(VSplit<PFP>* vs = NULL);
         ~Node();
@@ -43,8 +43,6 @@ class Node {
         bool isActive() { return m_active; } 
         void setActive(bool active) { m_active = active; }
         
-	    static std::string CGoGNnameOfType() { return "Noeud"; } 
-
     private:
         /*Liens dans l'arborescence*/
         Node* m_parent;
@@ -56,6 +54,13 @@ class Node {
         VSplit<PFP>* m_vsplit;
         bool m_active;
 };
+
+typedef struct
+{
+    Algo::Surface::Node* it;
+    static std::string CGoGNnameOfType() { return "NodeInfo" ; }
+} NodeInfo;
+
 }//namespace Surface
 }//namespace Algo
 }//namespace CGoGN

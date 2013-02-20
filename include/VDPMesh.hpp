@@ -91,6 +91,11 @@ VDProgressiveMesh<PFP>::~VDProgressiveMesh()
 
 template <typename PFP>
 void VDProgressiveMesh<PFP>::addNodes() {
+    /*VertexAttribute noeud = m_map.getAttribute<EmbNode, VERTEX>("noeud");
+    AttributeContainer container = m_map.template getAttributeContainer<VERTEX>();
+    for(unsigned int i = container.begin(); i!=container.end(); container.next(i)) {
+        noeud[i] = new Node();
+    }*/
 }
 
 template <typename PFP>

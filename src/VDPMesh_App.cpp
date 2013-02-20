@@ -250,9 +250,9 @@ void VDPMesh_App::importMesh(std::string& filename)
 	if(!normal.isValid())
 		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
     
-    noeud = myMap.getAttribute<Algo::Surface::Node, VERTEX>("noeud") ;
+    noeud = myMap.getAttribute<EmbNode, VERTEX>("noeud") ;
 	if(!noeud.isValid())
-		noeud = myMap.addAttribute<Algo::Surface::Node, VERTEX>("noeud") ;
+		noeud = myMap.addAttribute<EmbNode, VERTEX>("noeud") ;
 
 	setParamObject(bb.maxSize(), bb.center().data()) ;
 	updateGLMatrices() ;
