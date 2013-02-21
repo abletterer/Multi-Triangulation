@@ -25,8 +25,6 @@
 #ifndef __PMESH__
 #define __PMESH__
 
-#include "VSplit.h"
-
 #include "Algo/Decimation/selector.h"
 #include "Algo/Decimation/edgeSelector.h"
 #include "Algo/Decimation/geometryApproximator.h"
@@ -61,7 +59,7 @@ private:
 	MAP& m_map ;
 	VertexAttribute<typename PFP::VEC3>& positionsTable ;
     
-    typedef NoMathIOAttribute<Algo::Surface::NodeInfo> EmbNode;
+    typedef NoMathIOAttribute<Algo::Surface::VDPMesh::NodeInfo> EmbNode;
     VertexAttribute<EmbNode> noeud;
 
 	DartMarker& inactiveMarker ;
@@ -103,11 +101,8 @@ public:
 } ;
 
 } //namespace VDPMesh
-
 } //namespace Surface
-
 } //namespace Algo
-
 } //namespace CGoGN
 
 #include "VDPMesh.hpp"

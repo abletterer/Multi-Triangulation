@@ -34,6 +34,9 @@ namespace Algo
 namespace Surface
 {
 
+namespace VDPMesh
+{
+
 template <typename PFP>
 class VSplit 
 {
@@ -102,7 +105,8 @@ public:
     }
 } ;
 
-} // Surface
+} //namespace VDPMesh
+} //namespace Surface
 } //namespace Algo
 } //namespace CGoGN
 

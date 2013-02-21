@@ -96,6 +96,7 @@ void VDProgressiveMesh<PFP>::addNodes() {
     AttributeContainer container = m_map.template getAttributeContainer<VERTEX>();
     for(unsigned int i = container.begin(); i!=container.end(); container.next(i)) {
         noeud[i] = new Node();
+        noeud[i].node->setActive(false);
     }
 }
 
@@ -117,29 +118,17 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 		Dart d2 = m_map.phi2(m_map.phi_1(d)) ;
 		Dart dd2 = m_map.phi2(m_map.phi_1(m_map.phi2(d))) ;
 
-		VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, dd2, d2) ;	// create new VSplit node
-        
-        noeud[d].node->setVSplit(vs);
+		VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, dd2, d2) ;	// create new VSplit node 
+
+        Node* n = new Node();
+        /*n->setVSplit(vs);
 
         //Mise en place de la hiérarchie de la forêt
-        noeud[d].node->setLeftChild(noeud[d2].node);
-        noeud[d2].node->setParent(noeud[d].node);
-        noeud[d].node->setRightChild(noeud[dd2].node);
-        noeud[dd2].node->setParent(noeud[d].node);
+        n->setLeftChild(noeud[d2].node);
+        noeud[d2].node->setParent(n);
+        n->setRightChild(noeud[dd2].node);
+        noeud[dd2].node->setParent(n);*/
 
-        if(noeud[d2].node->isActive() || noeud[dd2].node->isActive()) {
-            //On enlève les anciens sommets du front
-            if(noeud[d2].node->isActive()) {
-                m_splits.remove(noeud[d2].node->getVSplit());
-                noeud[d2].node->setActive(false);
-            }
-            if(noeud[dd2].node->isActive()) {
-                m_splits.remove(noeud[dd2].node->getVSplit());
-                noeud[dd2].node->setActive(false);
-            }
-        }
-
-        noeud[d].node->setActive(true);
 		m_splits.push_back(vs);
 
 		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)

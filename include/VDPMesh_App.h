@@ -58,16 +58,17 @@
 #include "VDPMesh.h"
 #include "Node.h"
 
-using namespace CGoGN ;
-
-struct PFP: public PFP_STANDARD
+namespace CGoGN
 {
-	// definition of the map
-	typedef EmbeddedMap2 MAP ;
-};
 
-typedef PFP::MAP MAP ;
-typedef PFP::VEC3 VEC3 ;
+namespace Algo
+{
+
+namespace Surface
+{
+
+namespace VDPMesh
+{    
 
 class VDPMesh_App : public Utils::QT::SimpleQT
 {
@@ -104,7 +105,7 @@ public:
 	VertexAttribute<VEC3> position ;
 	VertexAttribute<VEC3> normal ;
     
-    typedef NoMathIOAttribute<Algo::Surface::NodeInfo> EmbNode;
+    typedef NoMathIOAttribute<Algo::Surface::VDPMesh::NodeInfo> EmbNode;
     VertexAttribute<EmbNode> noeud ;
 
 	Algo::Render::GL2::MapRender* m_render ;
@@ -151,3 +152,8 @@ public slots:
     void slot_vertexNumber(int i);
     void slot_createPM();
 };
+
+} // namespace VDPMesh
+} // namespace Surface
+} // namespace Algo
+} // namespace CGoGN

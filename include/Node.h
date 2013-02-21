@@ -9,6 +9,8 @@ namespace Algo {
 
 namespace Surface {
 
+namespace VDPMesh {
+
 struct PFP: public PFP_STANDARD
 {
     typedef EmbeddedMap2 MAP;
@@ -57,8 +59,9 @@ typedef struct
     static std::string CGoGNnameOfType() { return "NodeInfo" ; }
 } NodeInfo;
 
-}//namespace Surface
-}//namespace Algo
-}//namespace CGoGN
+} //namespace VDPMesh
+} //namespace Surface
+} //namespace Algo
+} //namespace CGoGN
 
 #endif

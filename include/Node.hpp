@@ -6,6 +6,8 @@ namespace Algo {
 
 namespace Surface {
 
+namespace VDPMesh {
+
 Node::Node(VSplit<PFP>* vsplit) 
     : m_vsplit(vsplit),
       m_parent(NULL),
@@ -20,6 +22,7 @@ Node::~Node()
     delete m_vsplit;
 }
 
-}//namespace Surface
-}//namespace Algo
-}//namespace CGoGN
+} //namespace VDPMesh
+} //namespace Surface
+} //namespace Algo
+} //namespace CGoGN

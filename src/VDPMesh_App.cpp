@@ -24,7 +24,17 @@
 
 #include "VDPMesh_App.h"
 
-using namespace CGoGN::Algo::Surface::VDPMesh;
+namespace CGoGN
+{
+
+namespace Algo
+{
+
+namespace Surface
+{
+
+namespace VDPMesh
+{    
 
 VDPMesh_App::VDPMesh_App() :
 	m_renderStyle(FLAT),
@@ -371,6 +381,11 @@ void VDPMesh_App::slot_createPM() {
     updateMesh();
 }
 
+} // namespace VDPMesh
+} // namespace Surface
+} // namespace Algo
+} // namespace CGoGN
+
 /**********************************************************************************************
  *                                      MAIN FUNCTION                                         *
  **********************************************************************************************/
@@ -379,7 +394,7 @@ int main(int argc, char **argv)
 {
 	QApplication app(argc, argv) ;
 
-	VDPMesh_App sqt ;
+    CGoGN::Algo::Surface::VDPMesh::VDPMesh_App sqt ;
 	sqt.setGeometry(0, 0, 1000, 800) ;
  	sqt.show() ;
 
