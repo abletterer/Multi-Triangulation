@@ -95,7 +95,7 @@ template <typename PFP>
 void VDProgressiveMesh<PFP>::addNodes() {
     AttributeContainer container = m_map.template getAttributeContainer<VERTEX>();
     for(unsigned int i = container.begin(); i!=container.end(); container.next(i)) {
-        noeud[i] = new Node();
+        noeud[i].node = new Node();
         noeud[i].node->setActive(false);
     }
 }
@@ -106,6 +106,11 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	unsigned int nbVertices = m_map.template getNbOrbits<VERTEX>() ;
 	unsigned int nbWantedVertices = nbVertices * percentWantedVertices / 100 ;
 	CGoGNout << "  creating PM (" << nbVertices << " vertices).." << /* flush */ CGoGNendl ;
+	
+    
+    CGoGNout << "  addingNodes.." << /* flush */ CGoGNflush ;
+    addNodes();
+	CGoGNout << "  ..done" << /* flush */ CGoGNendl ;
 
 	bool finished = false ;
 	Dart d ;
@@ -121,14 +126,9 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 		VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, dd2, d2) ;	// create new VSplit node 
 
         Node* n = new Node();
-        /*n->setVSplit(vs);
+        n->setVSplit(vs);
 
-        //Mise en place de la hiérarchie de la forêt
-        n->setLeftChild(noeud[d2].node);
-        noeud[d2].node->setParent(n);
-        n->setRightChild(noeud[dd2].node);
-        noeud[dd2].node->setParent(n);*/
-
+        
 		m_splits.push_back(vs);
 
 		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
@@ -152,6 +152,20 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 			(*it)->affectApprox(d2);				// affect data to the resulting vertex
 
 		m_selector->updateAfterCollapse(d2, dd2) ;	// update selector
+        
+        //Mise en place de la hiérarchie de la forêt
+        /*Traversor2EV<MAP> trav(m_map, d);
+        int i=0;
+        for(Dart it = trav.begin(); it!=trav.end(); it = trav.next()) {
+            if(i==0) {
+                n->setLeftChild(noeud[it].node);
+            }
+            else if(i==1) {
+                n->setRightChild(noeud[it].node);
+            }
+            noeud[it].node->setParent(n);
+            ++i;
+        }*/
 
 		if(nbVertices <= nbWantedVertices)
 			finished = true ;

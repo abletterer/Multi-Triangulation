@@ -24,8 +24,14 @@ typedef PFP::VEC3 VEC3;
  */
 struct Node {
     public:
-        Node(VSplit<PFP>* vs = NULL);
-        ~Node();
+        Node(VSplit<PFP>* vsplit = NULL)
+        : m_parent(NULL), m_child_left(NULL), m_child_right(NULL), m_active(false)
+        {
+            m_vsplit = vsplit;
+        }
+        ~Node() {
+            delete m_vsplit;
+        }
 
         Node* getParent() { return m_parent; }
         void setParent(Node* parent) { m_parent = parent; }
