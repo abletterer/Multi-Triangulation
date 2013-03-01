@@ -68,7 +68,7 @@ private:
 	Algo::Surface::Decimation::EdgeSelector<PFP>* m_selector ;
 	std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*> m_approximators ;
 	std::list<VSplit<PFP>*> m_splits ;
-	//unsigned int m_cur ;
+    std::list<Node*> m_active_nodes;
 
 	Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionApproximator ;
 
@@ -96,6 +96,9 @@ public:
 
 	void coarsen() ;
 	void refine() ;
+
+	int coarsen(Node* n) ;
+	int refine(Node* n) ;
 
 	unsigned int nbSplits() { return m_splits.size() ; }
 } ;

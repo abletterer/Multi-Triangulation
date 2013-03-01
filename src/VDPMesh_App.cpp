@@ -95,6 +95,8 @@ void VDPMesh_App::initGUI()
 	setCallBack( dock.slider_normalsSize, SIGNAL(valueChanged(int)), SLOT(slot_normalsSize(int)) ) ;
     setCallBack( dock.slider_vertexNumber, SIGNAL(valueChanged(int)), SLOT(slot_vertexNumber(int)));
     setCallBack( dock.pushButton_createPM, SIGNAL(clicked()), SLOT(slot_createPM()));
+    setCallBack( dock.pushButton_coarsen, SIGNAL(clicked()), SLOT(slot_coarsen()));
+    setCallBack( dock.pushButton_refine, SIGNAL(clicked()), SLOT(slot_refine()));
 }
 
 void VDPMesh_App::cb_initGL()
@@ -379,6 +381,18 @@ void VDPMesh_App::slot_createPM() {
     dock.lineEdit_pourcent->setEnabled(false);
 	
     updateMesh();
+}
+
+void VDPMesh_App::slot_refine() {
+   m_pmesh->refine(); 
+   CGoGNout << " elements refined" << CGoGNendl;
+   updateMesh();
+}
+
+void VDPMesh_App::slot_coarsen() {
+   m_pmesh->coarsen(); 
+   CGoGNout << " elements coarsened" << CGoGNendl;
+   updateMesh();
 }
 
 } // namespace VDPMesh

@@ -25,7 +25,7 @@ typedef PFP::VEC3 VEC3;
 struct Node {
     public:
         Node(VSplit<PFP>* vsplit = NULL)
-        : m_parent(NULL), m_child_left(NULL), m_child_right(NULL), m_active(false)
+        : m_parent(NULL), m_child_left(NULL), m_child_right(NULL), m_active(false), m_position(NULL)
         {
             m_vsplit = vsplit;
         }
@@ -46,7 +46,18 @@ struct Node {
         void setVSplit(VSplit<PFP>* vsplit) { m_vsplit = vsplit; }
 
         bool isActive() { return m_active; } 
-        void setActive(bool active) { m_active = active; }
+        void setActive(bool active) { 
+            m_active = active;
+        }
+
+        std::list<Node*>::iterator getCurrentPosition() { return m_position; }
+        void setCurrentPosition(std::list<Node*>::iterator position) { m_position = position; }
+
+        bool operator==(const Node& n) {
+            return  m_parent == n.m_parent
+                &&  m_child_left == n.m_child_left
+                &&  m_child_right == n.m_child_right;
+        }
         
     private:
         /*Liens dans l'arborescence*/
@@ -57,6 +68,9 @@ struct Node {
         /*Informations pour la transformation*/
         VSplit<PFP>* m_vsplit;
         bool m_active;
+
+        /*Informations pour l'acces dans le front courant*/
+        std::list<Node*>::iterator m_position;
 };
 
 typedef struct
