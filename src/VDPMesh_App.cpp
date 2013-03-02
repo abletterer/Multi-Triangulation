@@ -296,17 +296,23 @@ void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
 }
 
 void VDPMesh_App::updateMesh() {
-    //Pas allDarts, utilisation selector
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::POINTS) ;
+    CGoGNout << "initPrimitives POINTS" << CGoGNendl;
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::LINES) ;
+    CGoGNout << "initPrimitives LINES" << CGoGNendl;
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::TRIANGLES) ;
+	CGoGNout << "initPrimitives TRIANGLES" << CGoGNendl;
 	
-	m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f) ;
-    
-	Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;
-
-	m_positionVBO->updateData(position) ;
+    m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f) ;
+    CGoGNout << "updateData topo" << CGoGNendl;
+	
+    Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;
+    CGoGNout << "computeNormalVertices" << CGoGNendl;
+	
+    m_positionVBO->updateData(position) ;
+    CGoGNout << "updateData positionVBO" << CGoGNendl;
 	m_normalVBO->updateData(normal) ;
+    CGoGNout << "updateData normalVBO" << CGoGNendl;
     
     updateGL();
 }

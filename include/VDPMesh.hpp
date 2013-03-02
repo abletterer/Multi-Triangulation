@@ -138,7 +138,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
         /*Mise en place de la hiérarchie par rapport au nouveau noeud*/
         n->setLeftChild(n_d2);
-        n->setLeftChild(n_dd2);
+        n->setRightChild(n_dd2);
         n_d2->setParent(n);
         n_dd2->setParent(n);
 
@@ -273,17 +273,6 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
             parent->setCurrentPosition(--m_active_nodes.end());
             ++res;
         }
-        else {
-            if(parent==NULL) {
-                CGoGNout << "Le parent n'existe pas" << CGoGNendl;
-            }
-            else {
-                CGoGNout << "Le parent est actif" << CGoGNendl;
-            }
-        }
-    }
-    else {
-        CGoGNout << "Noeud courant pas actif" << CGoGNendl;
     }
     return res;
 }
@@ -375,17 +364,6 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             child_right->setCurrentPosition(--m_active_nodes.end());
             res++;
         }
-        else {
-            if(child_left==NULL && child_right==NULL) {
-                CGoGNout << "Les deux fils n'existent pas" << CGoGNendl; 
-            }
-            else {
-                CGoGNout << "Un des fils (au moins) est actif" << CGoGNendl;
-            }
-        }
-    }
-    else {
-        CGoGNout << "Noeud courant pas actif" << CGoGNendl;
     }
     return res;
 }
