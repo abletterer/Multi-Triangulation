@@ -343,6 +343,12 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        unsigned int e2 = m_map.template getEmbedding<EDGE>(m_map.phi_1(d));	// and new edges
 	        unsigned int e3 = m_map.template getEmbedding<EDGE>(m_map.phi1(dd));
 	        unsigned int e4 = m_map.template getEmbedding<EDGE>(m_map.phi_1(dd));
+	
+            CGoGNout << "Sommet : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNflush;
+            CGoGNout << " | Arête : " << m_map.template getEmbedding<EDGE>(d2) << CGoGNendl;
+            CGoGNout << "-------------------------------------------" << CGoGNendl;
+            CGoGNout << "Sommet : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNflush;
+            CGoGNout << " | Arête : " << m_map.template getEmbedding<EDGE>(dd2) << CGoGNendl;
 
             vertexSplit(vs);
             
