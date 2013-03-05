@@ -117,7 +117,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
     addNodes();
 	CGoGNout << "..done" << CGoGNendl ;
 	
-    CGoGNout << "  creating PM (" << nbVertices << " vertices).." << /* flush */ CGoGNendl ;	
+    CGoGNout << "  creating PM (" << nbVertices << " vertices).." << /* flush */ CGoGNflush ;	
 
 	bool finished = false ;
 	Dart d ;
@@ -279,11 +279,10 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 
 template <typename PFP>
 void VDProgressiveMesh<PFP>::refine() {
-    int i=0;
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
-        i += refine(*it);
+        if(refine(*it)==1)
+            break;        
     }
-    CGoGNout << i << CGoGNflush;
 }
 
 template <typename PFP>
@@ -349,6 +348,10 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             CGoGNout << "-------------------------------------------" << CGoGNendl;
             CGoGNout << "Sommet : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNflush;
             CGoGNout << " | Arête : " << m_map.template getEmbedding<EDGE>(dd2) << CGoGNendl;
+
+
+            //VERIFIER SI NOEUD RECUPERE DU SOMMET CORRESPOND AUX FILS ESTIMES
+
 
             vertexSplit(vs);
             
