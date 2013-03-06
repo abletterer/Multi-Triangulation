@@ -343,34 +343,11 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        unsigned int e3 = m_map.template getEmbedding<EDGE>(m_map.phi1(dd));
 	        unsigned int e4 = m_map.template getEmbedding<EDGE>(m_map.phi_1(dd));
 	
-            CGoGNout << "Sommet : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNflush;
-            CGoGNout << " | Arête : " << m_map.template getEmbedding<EDGE>(d2) << CGoGNendl;
-            CGoGNout << "-------------------------------------------" << CGoGNendl;
-            CGoGNout << "Sommet : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNflush;
-            CGoGNout << " | Arête : " << m_map.template getEmbedding<EDGE>(dd2) << CGoGNendl;
-
-
             //VERIFIER SI NOEUD RECUPERE DU SOMMET CORRESPOND AUX FILS ESTIMES
 
-            Node* tmp_d2 = noeud[d2].node;
-            Node* tmp_dd2 = noeud[dd2].node;
-
-            CGoGNout << "Informations sur d2" << CGoGNendl;
-            CGoGNout << "  Sommet de gauche: " << m_map.template getEmbedding<VERTEX>(tmp_d2->getVSplit()->getLeftEdge()) << CGoGNendl;
-            CGoGNout << "  Sommet de droite: " << m_map.template getEmbedding<VERTEX>(tmp_d2->getVSplit()->getRightEdge()) << CGoGNendl;
-
-            CGoGNout << "Informations sur dd2" << CGoGNendl;
-            CGoGNout << "  Sommet de gauche: " << m_map.template getEmbedding<VERTEX>(tmp_dd2->getVSplit()->getLeftEdge()) << CGoGNendl;
-            CGoGNout << "  Sommet de droite: " << m_map.template getEmbedding<VERTEX>(tmp_dd2->getVSplit()->getRightEdge()) << CGoGNendl;
-
-            CGoGNout << "Informations sur le fils gauche" << CGoGNendl;
-            CGoGNout << "  Sommet de gauche: " << m_map.template getEmbedding<VERTEX>(child_left->getVSplit()->getLeftEdge()) << CGoGNendl;
-            CGoGNout << "  Sommet de droite: " << m_map.template getEmbedding<VERTEX>(child_left->getVSplit()->getRightEdge()) << CGoGNendl;
-
-            CGoGNout << "Informations sur le fils droit" << CGoGNendl;
-            CGoGNout << "  Sommet de gauche: " << m_map.template getEmbedding<VERTEX>(child_right->getVSplit()->getLeftEdge()) << CGoGNendl;
-            CGoGNout << "  Sommet de droite: " << m_map.template getEmbedding<VERTEX>(child_right->getVSplit()->getRightEdge()) << CGoGNendl;
-
+            CGoGNout << "  Arete d2 : " << m_map.template getEmbedding<EDGE>(d2) << CGoGNendl;
+            CGoGNout << "  Arete dd2 : " << m_map.template getEmbedding<EDGE>(dd2) << CGoGNendl;
+            
             vertexSplit(vs);
             
 	        m_map.template setOrbitEmbedding<VERTEX>(d, v1);		// embed the
