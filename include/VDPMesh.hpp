@@ -352,6 +352,24 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 
             //VERIFIER SI NOEUD RECUPERE DU SOMMET CORRESPOND AUX FILS ESTIMES
 
+            Node* tmp_d2 = noeud[d2].node;
+            Node* tmp_dd2 = noeud[dd2].node;
+
+            CGoGNout << "Informations sur d2" << CGoGNendl;
+            CGoGNout << "  Sommet de gauche: " << m_map.template getEmbedding<VERTEX>(tmp_d2->getVSplit()->getLeftEdge()) << CGoGNendl;
+            CGoGNout << "  Sommet de droite: " << m_map.template getEmbedding<VERTEX>(tmp_d2->getVSplit()->getRightEdge()) << CGoGNendl;
+
+            CGoGNout << "Informations sur dd2" << CGoGNendl;
+            CGoGNout << "  Sommet de gauche: " << m_map.template getEmbedding<VERTEX>(tmp_dd2->getVSplit()->getLeftEdge()) << CGoGNendl;
+            CGoGNout << "  Sommet de droite: " << m_map.template getEmbedding<VERTEX>(tmp_dd2->getVSplit()->getRightEdge()) << CGoGNendl;
+
+            CGoGNout << "Informations sur le fils gauche" << CGoGNendl;
+            CGoGNout << "  Sommet de gauche: " << m_map.template getEmbedding<VERTEX>(child_left->getVSplit()->getLeftEdge()) << CGoGNendl;
+            CGoGNout << "  Sommet de droite: " << m_map.template getEmbedding<VERTEX>(child_left->getVSplit()->getRightEdge()) << CGoGNendl;
+
+            CGoGNout << "Informations sur le fils droit" << CGoGNendl;
+            CGoGNout << "  Sommet de gauche: " << m_map.template getEmbedding<VERTEX>(child_right->getVSplit()->getLeftEdge()) << CGoGNendl;
+            CGoGNout << "  Sommet de droite: " << m_map.template getEmbedding<VERTEX>(child_right->getVSplit()->getRightEdge()) << CGoGNendl;
 
             vertexSplit(vs);
             
