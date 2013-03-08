@@ -99,6 +99,7 @@ void VDProgressiveMesh<PFP>::addNodes() {
         noeud[d].node->setActive(true);
         m_active_nodes.push_back(noeud[d].node);
         if(m_active_nodes.size()==1) {
+            //A l'insertion du premier élément
             noeud[d].node->setCurrentPosition(m_active_nodes.begin());
         }
         else {
@@ -121,7 +122,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 	bool finished = false ;
 	Dart d ;
-    std::vector<Dart> ids;
+    std::list<Dart>* ids = new std::list<Dart>();
 	while(!finished)
 	{
 		if(!m_selector->nextEdge(d))
@@ -180,20 +181,20 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         
         noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
 
-        ids.push_back(vs->getEdge());
+        ids->push_back(vs->getEdge());
 
-        if(std::find(ids.begin(), ids.end(), vs->getRightEdge())!=ids.end()) {
+        if(std::find(ids->begin(), ids->end(), vs->getRightEdge())!=ids->end()) {
             CGoGNout << "Fils droit trouvé" << CGoGNendl;
-            if(std::find(ids.begin(), ids.end(), vs->getLeftEdge())!=ids.end()) {
+            if(std::find(ids->begin(), ids->end(), vs->getLeftEdge())!=ids->end()) {
                 CGoGNout << "Fils gauche trouvé" << CGoGNendl;
             }
             break;
         }
         
-        CGoGNout << "Noeud :" << CGoGNendl;
+        /*CGoGNout << "Noeud :" << CGoGNendl;
         CGoGNout << "  Sommet :" << vs->getEdge() << CGoGNendl;
         CGoGNout << "  Fils droit :" << vs->getRightEdge() << CGoGNendl;
-        CGoGNout << "  Fils gauche :" << vs->getLeftEdge() << CGoGNendl;
+        CGoGNout << "  Fils gauche :" << vs->getLeftEdge() << CGoGNendl;*/
         
 		if(nbVertices <= nbWantedVertices)
 			finished = true ;

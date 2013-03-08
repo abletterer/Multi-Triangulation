@@ -74,6 +74,9 @@ private:
 
 	bool m_initOk ;
 
+    //DEBUG
+    int m_height; //Hauteur de l'arbre le plus grand de la forêt
+
 public:
 	VDProgressiveMesh(
 		MAP& map, DartMarker& inactive,
@@ -101,6 +104,11 @@ public:
 	int refine(Node* n) ;
 
 	unsigned int nbSplits() { return m_splits.size() ; }
+
+
+
+    /*DEBUG FUNCTIONS*/
+    int getForestHeight() { return m_height; }
 } ;
 
 } //namespace VDPMesh
