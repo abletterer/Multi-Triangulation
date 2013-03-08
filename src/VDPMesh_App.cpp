@@ -303,7 +303,7 @@ void VDPMesh_App::updateMesh() {
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::TRIANGLES) ;
 	CGoGNout << "initPrimitives TRIANGLES" << CGoGNendl;
 	
-    m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f) ;
+    m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f, *m_selectorMarked) ;
     CGoGNout << "updateData topo" << CGoGNendl;
 	
     Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;

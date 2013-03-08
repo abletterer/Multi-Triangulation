@@ -121,6 +121,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 	bool finished = false ;
 	Dart d ;
+    std::vector<Dart> ids;
 	while(!finished)
 	{
 		if(!m_selector->nextEdge(d))
@@ -178,9 +179,25 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         n->setCurrentPosition(--m_active_nodes.end());
         
         noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
+
+        ids.push_back(vs->getEdge());
+
+        if(std::find(ids.begin(), ids.end(), vs->getRightEdge())!=ids.end()) {
+            CGoGNout << "Fils droit trouvé" << CGoGNendl;
+            if(std::find(ids.begin(), ids.end(), vs->getLeftEdge())!=ids.end()) {
+                CGoGNout << "Fils gauche trouvé" << CGoGNendl;
+            }
+            break;
+        }
+        
+        CGoGNout << "Noeud :" << CGoGNendl;
+        CGoGNout << "  Sommet :" << vs->getEdge() << CGoGNendl;
+        CGoGNout << "  Fils droit :" << vs->getRightEdge() << CGoGNendl;
+        CGoGNout << "  Fils gauche :" << vs->getLeftEdge() << CGoGNendl;
         
 		if(nbVertices <= nbWantedVertices)
 			finished = true ;
+
 	}
 	delete m_selector ;
 	m_selector = NULL ;
