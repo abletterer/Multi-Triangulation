@@ -45,6 +45,9 @@ struct Node {
         VSplit<PFP>* getVSplit() { return m_vsplit; }
         void setVSplit(VSplit<PFP>* vsplit) { m_vsplit = vsplit; }
 
+        Dart getDart() { return m_dart; }
+        void setDart(Dart dart) { m_dart = dart;  }
+
         bool isActive() { return m_active; } 
         void setActive(bool active) { 
             m_active = active;
@@ -52,6 +55,9 @@ struct Node {
 
         std::list<Node*>::iterator getCurrentPosition() { return m_position; }
         void setCurrentPosition(std::list<Node*>::iterator position) { m_position = position; }
+
+        int getHeight() { return m_height;  }
+        void setHeight(int height) { m_height = height;  }
 
         bool operator==(const Node& n) {
             return  m_parent == n.m_parent
@@ -67,10 +73,14 @@ struct Node {
         
         /*Informations pour la transformation*/
         VSplit<PFP>* m_vsplit;
+        Dart m_dart;
         bool m_active;
 
         /*Informations pour l'acces dans le front courant*/
         std::list<Node*>::iterator m_position;
+
+        /*Informations sur la position dans l'arbre (hauteur du noeud)*/
+        int  m_height;
 };
 
 typedef struct

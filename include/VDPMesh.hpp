@@ -97,6 +97,8 @@ void VDProgressiveMesh<PFP>::addNodes() {
     for(Dart d = trav.begin(); d!=trav.end(); d = trav.next()) {
         noeud[d].node = new Node();
         noeud[d].node->setActive(true);
+        noeud[d].node->setDart(d);
+        noeud[d].node->setHeight(0);
         m_active_nodes.push_back(noeud[d].node);
         if(m_active_nodes.size()==1) {
             //A l'insertion du premier élément
@@ -106,6 +108,21 @@ void VDProgressiveMesh<PFP>::addNodes() {
             noeud[d].node->setCurrentPosition(--m_active_nodes.end());
         }
     }
+}
+
+template <typename PFP>
+bool VDProgressiveMesh<PFP>::areAdjacentFacesActive(Dart d) {
+    bool res = true;
+    Traversor2EF<MAP> trav(m_map, d);
+    for(Dart it = trav.begin(); it != trav.end() && res; it = trav.next()) {
+        //On traverse les faces adjacentes a l'arêt courante
+        Node* node = noeud[d].node;
+        if(!node->isActive()) {
+            CGoGNout << "Noeud non actif" << CGoGNendl;
+            res = false;
+        }
+    }
+    return res;
 }
 
 template <typename PFP>
@@ -122,7 +139,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 	bool finished = false ;
 	Dart d ;
-    std::list<Dart>* ids = new std::list<Dart>();
 	while(!finished)
 	{
 		if(!m_selector->nextEdge(d))
@@ -135,6 +151,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 		VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, dd2, d2) ;	// create new VSplit node 
         
         Node* n = new Node(vs);   //Création du nouveau noeud de l'arbre
+
         Node* n_d2 = noeud[d2].node;
         Node* n_dd2 = noeud[dd2].node;
 
@@ -180,17 +197,25 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         n->setCurrentPosition(--m_active_nodes.end());
         
         noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
-
-        ids->push_back(vs->getEdge());
-
-        if(std::find(ids->begin(), ids->end(), vs->getRightEdge())!=ids->end()) {
-            CGoGNout << "Fils droit trouvé" << CGoGNendl;
-            if(std::find(ids->begin(), ids->end(), vs->getLeftEdge())!=ids->end()) {
-                CGoGNout << "Fils gauche trouvé" << CGoGNendl;
-            }
-            break;
-        }
+        n->setDart(d2);
         
+        /*Calcul de la hauteur du plus grand arbre de la forêt*/
+        int height;
+        if(noeud[d2].node->getHeight()>noeud[dd2].node->getHeight()) {
+            height = noeud[d2].node->getHeight();
+        }
+        else {
+            height = noeud[dd2].node->getHeight();
+        }
+        n->setHeight(height);
+
+        if(m_height<=height) {
+            /*Si la hauteur du plus grand arbre est inférieure ou égale à celle de l'arbre actuel*/
+            /*NB: La hauteur de l'arbre ne sera jamais inférieure*/
+            ++m_height;
+        }
+
+
         /*CGoGNout << "Noeud :" << CGoGNendl;
         CGoGNout << "  Sommet :" << vs->getEdge() << CGoGNendl;
         CGoGNout << "  Fils droit :" << vs->getRightEdge() << CGoGNendl;
@@ -205,6 +230,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 	CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
     CGoGNout << m_active_nodes.size() << " active nodes" << CGoGNendl;
+    CGoGNout << "Hauteur du plus grand arbre de la forêt : " << m_height << CGoGNendl;
 }
 
 template <typename PFP>
@@ -343,7 +369,8 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
         Node* child_left = n->getLeftChild();
         Node* child_right = n->getRightChild();
         if(child_left!=NULL && child_right!=NULL 
-        && !child_left->isActive() && !child_right->isActive()) {
+        && !child_left->isActive() && !child_right->isActive()
+        && areAdjacentFacesActive(n->getDart())) {
             //Si n a deux fils et que ceux-ci ne font pas partie du front
             VSplit<PFP>* vs = n->getVSplit();
 

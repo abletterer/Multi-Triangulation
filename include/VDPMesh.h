@@ -87,6 +87,7 @@ public:
 	bool initOk() { return m_initOk ; }
 
     void addNodes() ;
+    bool areAdjacentFacesActive(Dart d) ;
 
 	void createPM(unsigned int percentWantedVertices) ;
 
