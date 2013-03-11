@@ -108,6 +108,7 @@ void VDProgressiveMesh<PFP>::addNodes() {
             noeud[d].node->setCurrentPosition(--m_active_nodes.end());
         }
     }
+    m_height = 0;
 }
 
 template <typename PFP>
@@ -162,6 +163,15 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         n_dd2->setParent(n);
 
 		m_splits.push_back(vs);
+        
+        /*Calcul de la hauteur du plus grand arbre de la forêt*/
+        int height;
+        if(noeud[d2].node->getHeight()>noeud[dd2].node->getHeight()) {
+            height = noeud[d2].node->getHeight();
+        }
+        else {
+            height = noeud[dd2].node->getHeight();
+        }
 
 		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 		{
@@ -173,12 +183,16 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 		edgeCollapse(vs) ;							// collapse edge
 
+        CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+
 		unsigned int newV = m_map.template setOrbitEmbeddingOnNewCell<VERTEX>(d2) ;
 		unsigned int newE1 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(d2) ;
 		unsigned int newE2 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(dd2) ;
 		vs->setApproxV(newV) ;
 		vs->setApproxE1(newE1) ;
 		vs->setApproxE2(newE2) ;
+        
+        CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
 
 		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 			(*it)->affectApprox(d2);				// affect data to the resulting vertex
@@ -196,31 +210,17 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         m_active_nodes.push_back(n);
         n->setCurrentPosition(--m_active_nodes.end());
         
-        noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
         n->setDart(d2);
+        n->setHeight(height+1);
         
-        /*Calcul de la hauteur du plus grand arbre de la forêt*/
-        int height;
-        if(noeud[d2].node->getHeight()>noeud[dd2].node->getHeight()) {
-            height = noeud[d2].node->getHeight();
-        }
-        else {
-            height = noeud[dd2].node->getHeight();
-        }
-        n->setHeight(height);
-
+        noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
+        
         if(m_height<=height) {
             /*Si la hauteur du plus grand arbre est inférieure ou égale à celle de l'arbre actuel*/
-            /*NB: La hauteur de l'arbre ne sera jamais inférieure*/
+            /*NB: La hauteur du plus grande arbre ne sera jamais inférieure à celle de l'arbre courant*/
             ++m_height;
         }
 
-
-        /*CGoGNout << "Noeud :" << CGoGNendl;
-        CGoGNout << "  Sommet :" << vs->getEdge() << CGoGNendl;
-        CGoGNout << "  Fils droit :" << vs->getRightEdge() << CGoGNendl;
-        CGoGNout << "  Fils gauche :" << vs->getLeftEdge() << CGoGNendl;*/
-        
 		if(nbVertices <= nbWantedVertices)
 			finished = true ;
 
@@ -252,6 +252,12 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 	Dart dd = m_map.phi2(d) ;
 	Dart d2 = vs->getLeftEdge() ;
 	Dart dd2 = vs->getRightEdge() ;
+            
+    CGoGNout << "  Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
+    CGoGNout << "  Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;    
+    CGoGNout << "  Arete d2 : " << m_map.template getEmbedding<EDGE>(d2) << CGoGNendl;    
+    CGoGNout << "  Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl; 
+    CGoGNout << "  Arete dd2 : " << m_map.template getEmbedding<EDGE>(dd2) << CGoGNendl; 
 
 	m_map.insertTrianglePair(d, d2, dd2) ;
 
@@ -390,9 +396,6 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	
             //VERIFIER SI NOEUD RECUPERE DU SOMMET CORRESPOND AUX FILS ESTIMES
 
-            CGoGNout << "  Arete d2 : " << m_map.template getEmbedding<EDGE>(d2) << CGoGNendl;
-            CGoGNout << "  Arete dd2 : " << m_map.template getEmbedding<EDGE>(dd2) << CGoGNendl;
-            
             vertexSplit(vs);
             
 	        m_map.template setOrbitEmbedding<VERTEX>(d, v1);		// embed the
