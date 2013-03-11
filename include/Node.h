@@ -25,10 +25,10 @@ typedef PFP::VEC3 VEC3;
 struct Node {
     public:
         Node(VSplit<PFP>* vsplit = NULL)
-        : m_parent(NULL), m_child_left(NULL), m_child_right(NULL), m_active(false), m_position(NULL)
+        : m_parent(NULL), m_child_left(NULL), m_child_right(NULL), m_vsplit(vsplit), m_active(false), m_position(NULL)
         {
-            m_vsplit = vsplit;
         }
+
         ~Node() {
             delete m_vsplit;
         }

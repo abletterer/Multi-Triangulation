@@ -173,32 +173,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
             height = noeud[dd2].node->getHeight();
         }
 
-		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
-		{
-			(*it)->approximate(d) ;					// compute approximated attributes with its associated detail
-			(*it)->saveApprox(d) ;
-		}
-
-		m_selector->updateBeforeCollapse(d) ;		// update selector
-
-		edgeCollapse(vs) ;							// collapse edge
-
-        CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-
-		unsigned int newV = m_map.template setOrbitEmbeddingOnNewCell<VERTEX>(d2) ;
-		unsigned int newE1 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(d2) ;
-		unsigned int newE2 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(dd2) ;
-		vs->setApproxV(newV) ;
-		vs->setApproxE1(newE1) ;
-		vs->setApproxE2(newE2) ;
-        
-        CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-
-		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
-			(*it)->affectApprox(d2);				// affect data to the resulting vertex
-
-		m_selector->updateAfterCollapse(d2, dd2) ;	// update selector
-        
         /*Suppression des deux anciens noeuds du front courant*/
         m_active_nodes.erase(n_d2->getCurrentPosition());
         m_active_nodes.erase(n_dd2->getCurrentPosition());
@@ -213,14 +187,36 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         n->setDart(d2);
         n->setHeight(height+1);
         
-        noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
-        
         if(m_height<=height) {
             /*Si la hauteur du plus grand arbre est inférieure ou égale à celle de l'arbre actuel*/
-            /*NB: La hauteur du plus grande arbre ne sera jamais inférieure à celle de l'arbre courant*/
+            /*NB: La hauteur du plus grand arbre ne sera jamais inférieure à celle de l'arbre courant*/
             ++m_height;
         }
 
+		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
+		{
+			(*it)->approximate(d) ;					// compute approximated attributes with its associated detail
+			(*it)->saveApprox(d) ;
+		}
+
+		m_selector->updateBeforeCollapse(d) ;		// update selector
+
+		edgeCollapse(vs) ;							// collapse edge
+
+		unsigned int newV = m_map.template setOrbitEmbeddingOnNewCell<VERTEX>(d2) ;
+		unsigned int newE1 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(d2) ;
+		unsigned int newE2 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(dd2) ;
+		vs->setApproxV(newV) ;
+		vs->setApproxE1(newE1) ;
+		vs->setApproxE2(newE2) ;
+        
+        noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
+        
+		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
+			(*it)->affectApprox(d2);				// affect data to the resulting vertex
+
+		m_selector->updateAfterCollapse(d2, dd2) ;	// update selector
+        
 		if(nbVertices <= nbWantedVertices)
 			finished = true ;
 
@@ -255,9 +251,7 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
             
     CGoGNout << "  Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
     CGoGNout << "  Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;    
-    CGoGNout << "  Arete d2 : " << m_map.template getEmbedding<EDGE>(d2) << CGoGNendl;    
     CGoGNout << "  Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl; 
-    CGoGNout << "  Arete dd2 : " << m_map.template getEmbedding<EDGE>(dd2) << CGoGNendl; 
 
 	m_map.insertTrianglePair(d, d2, dd2) ;
 
