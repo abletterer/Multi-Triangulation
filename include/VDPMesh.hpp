@@ -85,9 +85,8 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
 template <typename PFP>
 VDProgressiveMesh<PFP>::~VDProgressiveMesh()
 {
-	for(unsigned int i = 0; i < m_splits.size(); ++i)
-		delete m_splits[i] ;
-	if(m_selector)
+	m_active_nodes.clear();
+    if(m_selector)
 		delete m_selector ;
 	for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 		delete (*it) ;
@@ -136,13 +135,10 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
     
     CGoGNout << "  addingNodes.." << CGoGNflush ;
     addNodes();
-    drawForest();
 	CGoGNout << "..done" << CGoGNendl ;
 	
     CGoGNout << "  creating PM (" << nbVertices << " vertices).." << /* flush */ CGoGNflush ;
     
-    dart_transfo = new std::list<Dart>();    
-
 	bool finished = false ;
 	Dart d ;
 	while(!finished)
@@ -222,14 +218,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 		m_selector->updateAfterCollapse(d2, dd2) ;	// update selector
 
-        dart_transfo->push_back(d);
-
-        CGoGNout << "Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-        CGoGNout << "Dart phi2(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(d)) << CGoGNendl;
-        
-        m_map.check();
-        drawForest();
-
 		if(nbVertices <= nbWantedVertices)
 			finished = true ;
 
@@ -240,7 +228,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
     CGoGNout << m_active_nodes.size() << " active nodes" << CGoGNendl;
     CGoGNout << "Hauteur du plus grand arbre de la forêt : " << m_height << CGoGNendl;
-    drawForest();
 }
 
 template <typename PFP>
@@ -271,12 +258,10 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
-    int i=0;
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
         if(coarsen(*it)==1)
             break;
     }
-    CGoGNout << i << CGoGNflush;
 }
 
 template <typename PFP>
@@ -308,14 +293,22 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
         Node* parent = n->getParent();
         if(parent!=NULL && !parent->isActive()) {
             //Si n a un noeud parent et que celui-ci ne fait pas partie du front
-            VSplit<PFP>* vs = n->getVSplit(); 
+            VSplit<PFP>* vs = parent->getVSplit(); 
             Dart d2 = vs->getLeftEdge();
             Dart dd2 = vs->getRightEdge();
+            Dart d1 = vs->getOppositeLeftEdge();
+            Dart dd1 = vs->getOppositeRightEdge();
+
+            if( inactiveMarker.isMarked(d1)
+            ||  inactiveMarker.isMarked(d2)
+            ||  inactiveMarker.isMarked(dd1)
+            ||  inactiveMarker.isMarked(dd2))
+                return res;
 
             edgeCollapse(vs);
 
             m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
-            m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
+	        m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1()) ;
             m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
 
             //Mise a jour des informations de l'arbre
@@ -391,10 +384,10 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        Dart d1 = vs->getOppositeLeftEdge();
 	        Dart dd1 = vs->getOppositeRightEdge();
 
-            if(     inactiveMarker.isMarked(d1)
-                ||  inactiveMarker.isMarked(d2)
-                ||  inactiveMarker.isMarked(dd1)
-                ||  inactiveMarker.isMarked(dd2))
+            if( inactiveMarker.isMarked(d1)
+            ||  inactiveMarker.isMarked(d2)
+            ||  inactiveMarker.isMarked(dd1)
+            ||  inactiveMarker.isMarked(dd2))
                 return res;
 
 	        unsigned int v1 = m_map.template getEmbedding<VERTEX>(d);				// get the embedding
@@ -404,19 +397,6 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        unsigned int e3 = m_map.template getEmbedding<EDGE>(m_map.phi1(dd));
 	        unsigned int e4 = m_map.template getEmbedding<EDGE>(m_map.phi_1(dd));
 	
-            //VERIFIER SI NOEUD RECUPERE DU SOMMET CORRESPOND AUX FILS ESTIMES
-            CGoGNout << "  Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-            CGoGNout << "  Sommet phi2(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(d)) << CGoGNendl;
-            CGoGNout << "  Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;  
-            CGoGNout << "  Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl; 
-
-            for(std::list<Dart>::iterator it = dart_transfo->begin(); it != dart_transfo->end(); ++it) {
-                if(*it==d) {
-                    CGoGNout << "Element trouve" << CGoGNendl;
-                    break;
-                }
-            }
-
             vertexSplit(vs);
             
 	        m_map.template setOrbitEmbedding<VERTEX>(d, v1);		// embed the

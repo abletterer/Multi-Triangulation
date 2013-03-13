@@ -254,11 +254,6 @@ void VDPMesh_App::importMesh(std::string& filename)
 	
 	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
     
-    //Vérification des relations de la carte
-    //Nombre de sommets/arêtes/faces
-    //Vérification du plongement
-    myMap.check();
-
     normalBaseSize = bb.diagSize() / 100.0f ;
 //	vertexBaseSize = normalBaseSize / 5.0f ;
 
@@ -296,24 +291,16 @@ void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
 }
 
 void VDPMesh_App::updateMesh() {
-    myMap.check();
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::POINTS) ;
-    CGoGNout << "initPrimitives POINTS" << CGoGNendl;
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::LINES) ;
-    CGoGNout << "initPrimitives LINES" << CGoGNendl;
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::TRIANGLES) ;
-	CGoGNout << "initPrimitives TRIANGLES" << CGoGNendl;
 	
     m_topoRender->updateData<PFP>(myMap, position, 0.85f, 0.85f, *m_selectorMarked) ;
-    CGoGNout << "updateData topo" << CGoGNendl;
 	
     Algo::Surface::Geometry::computeNormalVertices<PFP>(myMap, position, normal) ;
-    CGoGNout << "computeNormalVertices" << CGoGNendl;
 	
     m_positionVBO->updateData(position) ;
-    CGoGNout << "updateData positionVBO" << CGoGNendl;
 	m_normalVBO->updateData(normal) ;
-    CGoGNout << "updateData normalVBO" << CGoGNendl;
     
     updateGL();
 }
@@ -392,13 +379,11 @@ void VDPMesh_App::slot_createPM() {
 
 void VDPMesh_App::slot_refine() {
    m_pmesh->refine(); 
-   CGoGNout << " elements refined" << CGoGNendl;
    updateMesh();
 }
 
 void VDPMesh_App::slot_coarsen() {
    m_pmesh->coarsen(); 
-   CGoGNout << " elements coarsened" << CGoGNendl;
    updateMesh();
 }
 

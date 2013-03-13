@@ -67,7 +67,6 @@ private:
 
 	Algo::Surface::Decimation::EdgeSelector<PFP>* m_selector ;
 	std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*> m_approximators ;
-	std::list<VSplit<PFP>*> m_splits ;
     std::list<Node*> m_active_nodes;
 
 	Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionApproximator ;
@@ -76,7 +75,6 @@ private:
 
     //DEBUG
     int m_height; //Hauteur de l'arbre le plus grand de la forêt
-    std::list<Dart>* dart_transfo;
 
 public:
 	VDProgressiveMesh(
@@ -92,7 +90,6 @@ public:
 
 	void createPM(unsigned int percentWantedVertices) ;
 
-	std::vector<VSplit<PFP>*>& splits() { return m_splits ; }
 	Algo::Surface::Decimation::EdgeSelector<PFP>* selector() { return m_selector ; }
 	std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>& approximators() { return m_approximators ; }
 
@@ -104,8 +101,6 @@ public:
 
 	int coarsen(Node* n) ;
 	int refine(Node* n) ;
-
-	unsigned int nbSplits() { return m_splits.size() ; }
 
     /*DEBUG FUNCTIONS*/
     int getForestHeight() { return m_height; }
