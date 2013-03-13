@@ -49,12 +49,14 @@ private:
 	Dart edge ;
 	Dart right_edge ;
 	Dart left_edge ;
+    Dart opposite_right_edge;
+    Dart opposite_left_edge;
 	unsigned int approxVertexId ;
 	unsigned int approxEdgeId1, approxEdgeId2 ;
 
 public:
-	VSplit(MAP& m, Dart e, Dart r, Dart l)
-		: map(m), edge(e), right_edge(r), left_edge(l), approxVertexId(EMBNULL), approxEdgeId1(EMBNULL), approxEdgeId2(EMBNULL)
+	VSplit(MAP& m, Dart e, Dart r, Dart l, Dart ro, Dart ol)
+		: map(m), edge(e), right_edge(r), left_edge(l), opposite_right_edge(ro), opposite_left_edge(ol), approxVertexId(EMBNULL), approxEdgeId1(EMBNULL), approxEdgeId2(EMBNULL)
 	{}
 	~VSplit()
 	{
@@ -65,6 +67,8 @@ public:
 	Dart getEdge() { return edge ; }
 	Dart getLeftEdge() { return left_edge ; }
 	Dart getRightEdge() { return right_edge ; }
+	Dart getOppositeRightEdge() { return opposite_right_edge ; }
+	Dart getOppositeLeftEdge() { return opposite_left_edge ; }
 
 	unsigned int getApproxV() { return approxVertexId ; }
 	void setApproxV(unsigned int id)
@@ -98,6 +102,8 @@ public:
 		if(id != EMBNULL) cont.refLine(id) ;
 		approxEdgeId2 = id ;
 	}
+
+    MAP& getMap() { return map; }
 
     bool operator==(const VSplit& vs) 
     {

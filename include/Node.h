@@ -45,8 +45,8 @@ struct Node {
         VSplit<PFP>* getVSplit() { return m_vsplit; }
         void setVSplit(VSplit<PFP>* vsplit) { m_vsplit = vsplit; }
 
-        Dart getDart() { return m_dart; }
-        void setDart(Dart dart) { m_dart = dart;  }
+        unsigned int getVertex() { return m_vertex; }
+        void setVertex(unsigned int vertex) { m_vertex = vertex;  }
 
         bool isActive() { return m_active; } 
         void setActive(bool active) { 
@@ -64,20 +64,6 @@ struct Node {
                 &&  m_child_left == n.m_child_left
                 &&  m_child_right == n.m_child_right;
         }
-
-        void drawTree() {
-            if(m_child_left!=NULL) {
-                CGoGNout << " G( " << CGoGNflush;
-                m_child_left->drawTree();
-                CGoGNout << " ) " << CGoGNflush;
-            }
-            if(m_child_right!=NULL) {
-                CGoGNout << " D( " << CGoGNflush;
-                m_child_right->drawTree();
-                CGoGNout << " ) " << CGoGNflush;
-            }
-            CGoGNout << getDart() << CGoGNflush;
-        }
         
     private:
         /*Liens dans l'arborescence*/
@@ -87,7 +73,7 @@ struct Node {
         
         /*Informations pour la transformation*/
         VSplit<PFP>* m_vsplit;
-        Dart m_dart;
+        unsigned int m_vertex;
         bool m_active;
 
         /*Informations pour l'acces dans le front courant*/

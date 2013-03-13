@@ -105,9 +105,6 @@ public:
 	VertexAttribute<VEC3> position ;
 	VertexAttribute<VEC3> normal ;
     
-    typedef NoMathIOAttribute<Algo::Surface::VDPMesh::NodeInfo> EmbNode;
-    VertexAttribute<EmbNode> noeud ;
-
 	Algo::Render::GL2::MapRender* m_render ;
 	Algo::Render::GL2::TopoRender* m_topoRender ;
 

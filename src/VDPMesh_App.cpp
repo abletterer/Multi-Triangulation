@@ -254,6 +254,10 @@ void VDPMesh_App::importMesh(std::string& filename)
 	
 	bb = Algo::Geometry::computeBoundingBox<PFP>(myMap, position) ;
     
+    //Vérification des relations de la carte
+    //Nombre de sommets/arêtes/faces
+    //Vérification du plongement
+    myMap.check();
 
     normalBaseSize = bb.diagSize() / 100.0f ;
 //	vertexBaseSize = normalBaseSize / 5.0f ;
@@ -261,10 +265,6 @@ void VDPMesh_App::importMesh(std::string& filename)
     normal = myMap.getAttribute<VEC3, VERTEX>("normal") ;
 	if(!normal.isValid())
 		normal = myMap.addAttribute<VEC3, VERTEX>("normal") ;
-    
-    noeud = myMap.getAttribute<EmbNode, VERTEX>("noeud") ;
-	if(!noeud.isValid())
-		noeud = myMap.addAttribute<EmbNode, VERTEX>("noeud") ;
 
 	setParamObject(bb.maxSize(), bb.center().data()) ;
 	updateGLMatrices() ;
@@ -296,6 +296,7 @@ void VDPMesh_App::exportMesh(std::string& filename, bool askExportMode)
 }
 
 void VDPMesh_App::updateMesh() {
+    myMap.check();
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::POINTS) ;
     CGoGNout << "initPrimitives POINTS" << CGoGNendl;
 	m_render->initPrimitives<PFP>(myMap, *m_selectorMarked, Algo::Render::GL2::LINES) ;
