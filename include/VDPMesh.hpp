@@ -136,7 +136,9 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
     addNodes();
 	CGoGNout << "..done" << CGoGNendl ;
 	
-    CGoGNout << "  creating PM (" << nbVertices << " vertices).." << /* flush */ CGoGNflush ;	
+    CGoGNout << "  creating PM (" << nbVertices << " vertices).." << /* flush */ CGoGNflush ;
+    
+    dart_transfo = new std::list<Dart>();    
 
 	bool finished = false ;
 	Dart d ;
@@ -162,8 +164,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         n_d2->setParent(n);
         n_dd2->setParent(n);
 
-		m_splits.push_back(vs);
-        
         /*Calcul de la hauteur du plus grand arbre de la forêt*/
         int height;
         if(noeud[d2].node->getHeight()>noeud[dd2].node->getHeight()) {
@@ -201,14 +201,14 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 		m_selector->updateBeforeCollapse(d) ;		// update selector
 
-		edgeCollapse(vs) ;							// collapse edge
+		edgeCollapse(n->getVSplit()) ;							// collapse edge
 
 		unsigned int newV = m_map.template setOrbitEmbeddingOnNewCell<VERTEX>(d2) ;
 		unsigned int newE1 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(d2) ;
 		unsigned int newE2 = m_map.template setOrbitEmbeddingOnNewCell<EDGE>(dd2) ;
-		vs->setApproxV(newV) ;
-		vs->setApproxE1(newE1) ;
-		vs->setApproxE2(newE2) ;
+		n->getVSplit()->setApproxV(newV) ;
+		n->getVSplit()->setApproxE1(newE1) ;
+		n->getVSplit()->setApproxE2(newE2) ;
         
         noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
         
@@ -216,6 +216,10 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 			(*it)->affectApprox(d2);				// affect data to the resulting vertex
 
 		m_selector->updateAfterCollapse(d2, dd2) ;	// update selector
+
+        dart_transfo->push_back(d);
+
+        CGoGNout << "Dart d : " << d << CGoGNendl;
         
 		if(nbVertices <= nbWantedVertices)
 			finished = true ;
@@ -249,10 +253,6 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 	Dart d2 = vs->getLeftEdge() ;
 	Dart dd2 = vs->getRightEdge() ;
             
-    CGoGNout << "  Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-    CGoGNout << "  Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;    
-    CGoGNout << "  Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl; 
-
 	m_map.insertTrianglePair(d, d2, dd2) ;
 
 	inactiveMarker.unmarkOrbit<FACE>(d) ;
@@ -292,7 +292,7 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
     */
 
     int res = 0;
-    if(n->isActive()) {
+    if(n!=NULL && n->isActive()) {
         //Si n fait partie du front
         Node* parent = n->getParent();
         if(parent!=NULL && !parent->isActive()) {
@@ -364,7 +364,7 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
     */
 
     int res = 0;
-    if(n->isActive()) {
+    if(n!=NULL && n->isActive()) {
         //Si n fait partie du front
         Node* child_left = n->getLeftChild();
         Node* child_right = n->getRightChild();
@@ -389,6 +389,16 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        unsigned int e4 = m_map.template getEmbedding<EDGE>(m_map.phi_1(dd));
 	
             //VERIFIER SI NOEUD RECUPERE DU SOMMET CORRESPOND AUX FILS ESTIMES
+            CGoGNout << "  Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
+            CGoGNout << "  Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;  
+            CGoGNout << "  Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl; 
+
+            for(std::list<Dart>::iterator it = dart_transfo->begin(); it != dart_transfo->end(); ++it) {
+                if(*it==d) {
+                    CGoGNout << "Element trouve" << CGoGNendl;
+                    break;
+                }
+            }
 
             vertexSplit(vs);
             
@@ -412,6 +422,26 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
         }
     }
     return res;
+}
+
+/*FONCTIONS DE DEBOGAGE*/
+void VDPMesh::drawForest() {
+    for(std::list<Node*>::iterator it = m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
+        /*On parcourt l'ensemble des racines de la foret*/
+        drawTree(*it);
+    } 
+}
+
+void VDPMesh::drawTree(Node* node) {
+    if(node!=NULL) {
+        if(node->getLeftChild()!=NULL) {
+            drawTree(node->getLeftChild());
+        }
+        if(node->getRightChild()!=NULL) {
+            drawTree(node->getRightChild());
+        }
+        CGoGNout << m_map.template getEmbedding<VERTEX>(node->getDart()) << CGoGNendl;
+    }
 }
 
 } // namespace VDPMesh
