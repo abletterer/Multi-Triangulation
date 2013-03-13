@@ -231,6 +231,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
     CGoGNout << m_active_nodes.size() << " active nodes" << CGoGNendl;
     CGoGNout << "Hauteur du plus grand arbre de la forêt : " << m_height << CGoGNendl;
+    drawForest();
 }
 
 template <typename PFP>
@@ -425,24 +426,15 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 }
 
 /*FONCTIONS DE DEBOGAGE*/
-void VDPMesh::drawForest() {
+template <typename PFP>
+void VDProgressiveMesh<PFP>::drawForest() {
     for(std::list<Node*>::iterator it = m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
         /*On parcourt l'ensemble des racines de la foret*/
-        drawTree(*it);
+        (*it)->drawTree();
+        CGoGNout << CGoGNendl;
     } 
 }
 
-void VDPMesh::drawTree(Node* node) {
-    if(node!=NULL) {
-        if(node->getLeftChild()!=NULL) {
-            drawTree(node->getLeftChild());
-        }
-        if(node->getRightChild()!=NULL) {
-            drawTree(node->getRightChild());
-        }
-        CGoGNout << m_map.template getEmbedding<VERTEX>(node->getDart()) << CGoGNendl;
-    }
-}
 
 } // namespace VDPMesh
 } // namespace Surface

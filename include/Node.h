@@ -64,6 +64,20 @@ struct Node {
                 &&  m_child_left == n.m_child_left
                 &&  m_child_right == n.m_child_right;
         }
+
+        void drawTree() {
+            if(m_child_left!=NULL) {
+                CGoGNout << " G( " << CGoGNflush;
+                m_child_left->drawTree();
+                CGoGNout << " ) " << CGoGNflush;
+            }
+            if(m_child_right!=NULL) {
+                CGoGNout << " D( " << CGoGNflush;
+                m_child_right->drawTree();
+                CGoGNout << " ) " << CGoGNflush;
+            }
+            CGoGNout << getDart() << CGoGNflush;
+        }
         
     private:
         /*Liens dans l'arborescence*/
