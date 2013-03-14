@@ -98,7 +98,7 @@ void VDProgressiveMesh<PFP>::addNodes() {
     for(Dart d = trav.begin(); d!=trav.end(); d = trav.next()) {
         noeud[d].node = new Node();
         noeud[d].node->setActive(true);
-        noeud[d].node->setVertex(m_map.template getEmbedding<VERTEX>(d));      //A ENLEVER
+        noeud[d].node->setVertex(m_map.template getEmbedding<VERTEX>(d));   //Indique le numéro de sommet pointant sur ce noeud
         noeud[d].node->setHeight(0);
         m_active_nodes.push_back(noeud[d].node);
         if(m_active_nodes.size()==1) {
@@ -201,6 +201,15 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 		m_selector->updateBeforeCollapse(d) ;		// update selector
 
+        CGoGNout << "------------------CREATEPM------------------------" << CGoGNendl;
+        CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
+        CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+        CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+        CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+        CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+        CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
+        CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
+
 		edgeCollapse(n->getVSplit()) ;							// collapse edge
 
 		unsigned int newV = m_map.template setOrbitEmbeddingOnNewCell<VERTEX>(d2) ;
@@ -210,8 +219,17 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 		n->getVSplit()->setApproxE1(newE1) ;
 		n->getVSplit()->setApproxE2(newE2) ;
         
+        CGoGNout << "------|||||||||||------" << CGoGNendl;
+        CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
+        CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+        CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+        CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+        CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+        CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
+        CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
+
         noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
-        n->setVertex(m_map.template getEmbedding<VERTEX>(d2));     //A Enlever
+        n->setVertex(m_map.template getEmbedding<VERTEX>(d2));  //Indique le numéro de sommet pointant sur ce noeud
         
 		for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 			(*it)->affectApprox(d2);				// affect data to the resulting vertex
@@ -305,11 +323,29 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
             ||  inactiveMarker.isMarked(dd2))
                 return res;
 
+            CGoGNout << "---------------------COARSEN---------------------" << CGoGNendl;
+            CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(vs->getEdge()) << CGoGNendl;
+            CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+            CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+            CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+            CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+            CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
+            CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
+
             edgeCollapse(vs);
 
             m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
-	        m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1()) ;
+	        m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
             m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
+        
+            CGoGNout << "------|||||||||||------" << CGoGNendl;
+            CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(vs->getEdge()) << CGoGNendl;
+            CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+            CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+            CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+            CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+            CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
+            CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
 
             //Mise a jour des informations de l'arbre
             m_active_nodes.erase(parent->getLeftChild()->getCurrentPosition());
@@ -329,7 +365,7 @@ template <typename PFP>
 void VDProgressiveMesh<PFP>::refine() {
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
         if(refine(*it)==1)
-            break;        
+            break; 
     }
 }
 
@@ -389,6 +425,15 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             ||  inactiveMarker.isMarked(dd1)
             ||  inactiveMarker.isMarked(dd2))
                 return res;
+        
+            CGoGNout << "-------------------REFINE-----------------------" << CGoGNendl;
+            CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(vs->getEdge()) << CGoGNendl;
+            CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+            CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+            CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+            CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+            CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
+            CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
 
 	        unsigned int v1 = m_map.template getEmbedding<VERTEX>(d);				// get the embedding
 	        unsigned int v2 = m_map.template getEmbedding<VERTEX>(dd);			// of the new vertices
@@ -405,6 +450,15 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        m_map.template setOrbitEmbedding<EDGE>(d2, e2);		// and new edges
 	        m_map.template setOrbitEmbedding<EDGE>(dd1, e3);
 	        m_map.template setOrbitEmbedding<EDGE>(dd2, e4);
+
+            CGoGNout << "------|||||||||||------" << CGoGNendl;
+            CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(vs->getEdge()) << CGoGNendl;
+            CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+            CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+            CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+            CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+            CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
+            CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
 
             m_map.template copyDartEmbedding<VERTEX>(m_map.phi_1(d), d1);
             m_map.template copyDartEmbedding<VERTEX>(m_map.phi_1(dd), dd1);
