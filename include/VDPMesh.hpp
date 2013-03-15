@@ -246,6 +246,8 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
     CGoGNout << m_active_nodes.size() << " active nodes" << CGoGNendl;
     CGoGNout << "Hauteur du plus grand arbre de la forêt : " << m_height << CGoGNendl;
+    drawForest();
+    drawFront();
 }
 
 template <typename PFP>
@@ -309,7 +311,13 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
     if(n!=NULL && n->isActive()) {
         //Si n fait partie du front
         Node* parent = n->getParent();
-        if(parent!=NULL && !parent->isActive()) {
+        if(parent==NULL)
+            return res;
+        Node* child_left = n->getParent()->getLeftChild();
+        Node* child_right = n->getParent()->getRightChild();
+        if(!parent->isActive()
+        && child_left!=NULL && child_left->isActive()
+        && child_right!=NULL && child_right->isActive()) {
             //Si n a un noeud parent et que celui-ci ne fait pas partie du front
             VSplit<PFP>* vs = parent->getVSplit(); 
             Dart d2 = vs->getLeftEdge();
@@ -323,31 +331,15 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
             ||  inactiveMarker.isMarked(dd2))
                 return res;
 
-            CGoGNout << "---------------------COARSEN---------------------" << CGoGNendl;
-            CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(vs->getEdge()) << CGoGNendl;
-            CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-            CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-            CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-            CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-            CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
-            CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
-
             edgeCollapse(vs);
 
             m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
 	        m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
             m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
         
-            CGoGNout << "------|||||||||||------" << CGoGNendl;
-            CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(vs->getEdge()) << CGoGNendl;
-            CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-            CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-            CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-            CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-            CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
-            CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
-
             //Mise a jour des informations de l'arbre
+            CGoGNout << "left" << parent->getLeftChild()->getVertex() << CGoGNendl;
+            CGoGNout << "right" << parent->getRightChild()->getVertex() << CGoGNendl;
             m_active_nodes.erase(parent->getLeftChild()->getCurrentPosition());
             m_active_nodes.erase(parent->getRightChild()->getCurrentPosition());
             parent->getLeftChild()->setActive(false);
@@ -356,6 +348,8 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
             m_active_nodes.push_back(parent);
             parent->setCurrentPosition(--m_active_nodes.end());
             ++res;
+
+            drawFront();
         }
     }
     return res;
@@ -426,15 +420,6 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             ||  inactiveMarker.isMarked(dd2))
                 return res;
         
-            CGoGNout << "-------------------REFINE-----------------------" << CGoGNendl;
-            CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(vs->getEdge()) << CGoGNendl;
-            CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-            CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-            CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-            CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-            CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
-            CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
-
 	        unsigned int v1 = m_map.template getEmbedding<VERTEX>(d);				// get the embedding
 	        unsigned int v2 = m_map.template getEmbedding<VERTEX>(dd);			// of the new vertices
 	        unsigned int e1 = m_map.template getEmbedding<EDGE>(m_map.phi1(d));
@@ -451,18 +436,9 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        m_map.template setOrbitEmbedding<EDGE>(dd1, e3);
 	        m_map.template setOrbitEmbedding<EDGE>(dd2, e4);
 
-            CGoGNout << "------|||||||||||------" << CGoGNendl;
-            CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(vs->getEdge()) << CGoGNendl;
-            CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-            CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-            CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-            CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-            CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
-            CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
-
             m_map.template copyDartEmbedding<VERTEX>(m_map.phi_1(d), d1);
             m_map.template copyDartEmbedding<VERTEX>(m_map.phi_1(dd), dd1);
-            
+
             //Mise a jour des informations de l'arbre
             m_active_nodes.erase(n->getCurrentPosition());
             n->setActive(false);
@@ -473,6 +449,8 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             m_active_nodes.push_back(child_right);
             child_right->setCurrentPosition(--m_active_nodes.end());
             res++;
+
+            drawFront(); 
         }
     }
     return res;
@@ -489,20 +467,30 @@ void VDProgressiveMesh<PFP>::drawForest() {
 }
 
 template <typename PFP>
-        void VDProgressiveMesh<PFP>::drawTree(Node* node) {
-            CGoGNout << node->getVertex() << CGoGNflush;
-            if(node->getLeftChild()!=NULL) {
-                CGoGNout << " G( " << CGoGNflush;
-                drawTree(node->getLeftChild());
-                CGoGNout << " ) " << CGoGNflush;
-            }
-            if(node->getRightChild()!=NULL) {
-                CGoGNout << " D( " << CGoGNflush;
-                drawTree(node->getRightChild());
-                CGoGNout << " ) " << CGoGNflush;
-            }
-        }
+void VDProgressiveMesh<PFP>::drawTree(Node* node) {
+    CGoGNout << node->getVertex() << CGoGNflush;
+    if(node->getLeftChild()!=NULL) {
+        CGoGNout << " G( " << CGoGNflush;
+        drawTree(node->getLeftChild());
+        CGoGNout << " ) " << CGoGNflush;
+    }
+    if(node->getRightChild()!=NULL) {
+        CGoGNout << " D( " << CGoGNflush;
+        drawTree(node->getRightChild());
+        CGoGNout << " ) " << CGoGNflush;
+    }
+}
 
+template <typename PFP>
+void VDProgressiveMesh<PFP>::drawFront() {
+    CGoGNout << "Front courant : " << CGoGNendl;
+    for(std::list<Node*>::iterator it = m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
+        if(it!=--m_active_nodes.end())
+            CGoGNout << (*it)->getVertex() << " | " << CGoGNflush;
+        else
+            CGoGNout << (*it)->getVertex() <<  CGoGNendl;
+    }
+}
 
 } // namespace VDPMesh
 } // namespace Surface

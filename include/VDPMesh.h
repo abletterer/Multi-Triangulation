@@ -106,6 +106,7 @@ public:
     int getForestHeight() { return m_height; }
     void drawForest();
     void drawTree(Node* node);
+    void drawFront();
 } ;
 
 } //namespace VDPMesh
