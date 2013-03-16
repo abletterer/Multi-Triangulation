@@ -24,8 +24,9 @@ typedef PFP::VEC3 VEC3;
  */
 struct Node {
     public:
-        Node(VSplit<PFP>* vsplit = NULL)
-        : m_parent(NULL), m_child_left(NULL), m_child_right(NULL), m_vsplit(vsplit), m_active(false), m_position(NULL)
+        Node(VSplit<PFP>* vsplit = NULL, bool active = false, unsigned int vertex = -1, int height = 0)
+        :   m_parent(NULL), m_child_left(NULL), m_child_right(NULL), m_vsplit(vsplit), 
+            m_vertex(vertex), m_active(active), m_position(NULL), m_height(height)
         {
         }
 

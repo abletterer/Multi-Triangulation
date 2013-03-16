@@ -96,35 +96,11 @@ template <typename PFP>
 void VDProgressiveMesh<PFP>::addNodes() {
     TraversorV<MAP> trav(m_map);
     for(Dart d = trav.begin(); d!=trav.end(); d = trav.next()) {
-        noeud[d].node = new Node();
-        noeud[d].node->setActive(true);
-        noeud[d].node->setVertex(m_map.template getEmbedding<VERTEX>(d));   //Indique le numéro de sommet pointant sur ce noeud
-        noeud[d].node->setHeight(0);
-        m_active_nodes.push_back(noeud[d].node);
-        if(m_active_nodes.size()==1) {
-            //A l'insertion du premier élément
-            noeud[d].node->setCurrentPosition(m_active_nodes.begin());
-        }
-        else {
-            noeud[d].node->setCurrentPosition(--m_active_nodes.end());
-        }
+        noeud[d].node = new Node(NULL, true, m_map.template getEmbedding<VERTEX>(d), 0);
+        m_active_nodes.push_front(noeud[d].node);
+        noeud[d].node->setCurrentPosition(m_active_nodes.begin());
     }
     m_height = 0;
-}
-
-template <typename PFP>
-bool VDProgressiveMesh<PFP>::areAdjacentFacesActive(Dart d) {
-    bool res = true;
-    Traversor2EF<MAP> trav(m_map, d);
-    for(Dart it = trav.begin(); it != trav.end() && res; it = trav.next()) {
-        //On traverse les faces adjacentes a l'arêt courante
-        Node* node = noeud[d].node;
-        if(!node->isActive()) {
-            CGoGNout << "Noeud non actif" << CGoGNendl;
-            res = false;
-        }
-    }
-    return res;
 }
 
 template <typename PFP>
@@ -182,8 +158,8 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         
         /*Ajout du nouveau noeud au front courant*/
         n->setActive(true);
-        m_active_nodes.push_back(n);
-        n->setCurrentPosition(--m_active_nodes.end());
+        m_active_nodes.push_front(n);
+        n->setCurrentPosition(m_active_nodes.begin());
         
         n->setHeight(height+1);
         
@@ -201,15 +177,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 		m_selector->updateBeforeCollapse(d) ;		// update selector
 
-        CGoGNout << "------------------CREATEPM------------------------" << CGoGNendl;
-        CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-        CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-        CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-        CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-        CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-        CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
-        CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
-
 		edgeCollapse(n->getVSplit()) ;							// collapse edge
 
 		unsigned int newV = m_map.template setOrbitEmbeddingOnNewCell<VERTEX>(d2) ;
@@ -219,15 +186,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 		n->getVSplit()->setApproxE1(newE1) ;
 		n->getVSplit()->setApproxE2(newE2) ;
         
-        CGoGNout << "------|||||||||||------" << CGoGNendl;
-        CGoGNout << "Sommet d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-        CGoGNout << "Sommet d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-        CGoGNout << "Sommet d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-        CGoGNout << "Sommet dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-        CGoGNout << "Sommet dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-        CGoGNout << "Sommet ddd2 : " << m_map.template getEmbedding<VERTEX>(m_map.phi2(m_map.phi_1(dd2))) << CGoGNendl;
-        CGoGNout << "Sommet ddd1 : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d1)) << CGoGNendl;
-
         noeud[d2].node = n; //Affectation du nouveau noeud a l'attribut de sommet
         n->setVertex(m_map.template getEmbedding<VERTEX>(d2));  //Indique le numéro de sommet pointant sur ce noeud
         
@@ -246,7 +204,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
     CGoGNout << m_active_nodes.size() << " active nodes" << CGoGNendl;
     CGoGNout << "Hauteur du plus grand arbre de la forêt : " << m_height << CGoGNendl;
-    drawForest();
     drawFront();
 }
 
@@ -278,78 +235,53 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
-    for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
-        if(coarsen(*it)==1)
-            break;
+    for(std::list<Node*>::iterator it=m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
+        coarsen(*it);
     }
 }
 
 template <typename PFP>
 int VDProgressiveMesh<PFP>::coarsen(Node* n)
 {
-	/*
-    if(m_cur == m_splits.size())
-		return ;
-
-	VSplit<PFP>* vs = m_splits[m_cur] ; // get the split node
-	++m_cur ;
-    
-
-	// Dart d = vs->getEdge() ;
-	// Dart dd = m_map.phi2(d) ;		// get some darts
-	Dart d2 = vs->getLeftEdge() ;
-	Dart dd2 = vs->getRightEdge() ;
-
-	edgeCollapse(vs) ;	// collapse edge
-
-	m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV()) ;
-	m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1()) ;
-	m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2()) ;
-    */
-
     int res = 0;
     if(n!=NULL && n->isActive()) {
         //Si n fait partie du front
-        Node* parent = n->getParent();
-        if(parent==NULL)
-            return res;
-        Node* child_left = n->getParent()->getLeftChild();
-        Node* child_right = n->getParent()->getRightChild();
-        if(!parent->isActive()
-        && child_left!=NULL && child_left->isActive()
-        && child_right!=NULL && child_right->isActive()) {
-            //Si n a un noeud parent et que celui-ci ne fait pas partie du front
-            VSplit<PFP>* vs = parent->getVSplit(); 
-            Dart d2 = vs->getLeftEdge();
-            Dart dd2 = vs->getRightEdge();
-            Dart d1 = vs->getOppositeLeftEdge();
-            Dart dd1 = vs->getOppositeRightEdge();
+        if(n->getParent()!=NULL && !n->getParent()->isActive()) {
+            /*Si le noeud parent existe et qu'il ne fait pas partie du front*/
+            Node* parent = n->getParent();
+            Node* child_left = parent->getLeftChild();
+            Node* child_right = parent->getRightChild();
+            if(child_left!=NULL && child_left->isActive()
+            && child_right!=NULL && child_right->isActive()) {
+                //Si n a un noeud parent et que celui-ci ne fait pas partie du front
+                VSplit<PFP>* vs = parent->getVSplit(); 
+                Dart d2 = vs->getLeftEdge();
+                Dart dd2 = vs->getRightEdge();
+                Dart d1 = vs->getOppositeLeftEdge();
+                Dart dd1 = vs->getOppositeRightEdge();
 
-            if( inactiveMarker.isMarked(d1)
-            ||  inactiveMarker.isMarked(d2)
-            ||  inactiveMarker.isMarked(dd1)
-            ||  inactiveMarker.isMarked(dd2))
-                return res;
+                /*if( inactiveMarker.isMarked(d1)
+                ||  inactiveMarker.isMarked(d2)
+                ||  inactiveMarker.isMarked(dd1)
+                ||  inactiveMarker.isMarked(dd2))
+                    return res;*/
 
-            edgeCollapse(vs);
+                edgeCollapse(vs);
 
-            m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
-	        m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
-            m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
+                m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
+	            m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
+                m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
         
-            //Mise a jour des informations de l'arbre
-            CGoGNout << "left" << parent->getLeftChild()->getVertex() << CGoGNendl;
-            CGoGNout << "right" << parent->getRightChild()->getVertex() << CGoGNendl;
-            m_active_nodes.erase(parent->getLeftChild()->getCurrentPosition());
-            m_active_nodes.erase(parent->getRightChild()->getCurrentPosition());
-            parent->getLeftChild()->setActive(false);
-            parent->getRightChild()->setActive(false);
-            parent->setActive(true);
-            m_active_nodes.push_back(parent);
-            parent->setCurrentPosition(--m_active_nodes.end());
-            ++res;
-
-            drawFront();
+                //Mise a jour des informations de l'arbre
+                m_active_nodes.erase(child_left->getCurrentPosition());
+                m_active_nodes.erase(child_right->getCurrentPosition());
+                child_left->setActive(false);
+                child_right->setActive(false);
+                parent->setActive(true);
+                m_active_nodes.push_front(parent);
+                parent->setCurrentPosition(m_active_nodes.begin());
+                ++res;
+            }
         }
     }
     return res;
@@ -358,45 +290,13 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::refine() {
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
-        if(refine(*it)==1)
-            break; 
+        refine(*it);
     }
 }
 
 template <typename PFP>
 int VDProgressiveMesh<PFP>::refine(Node* n)
 {
-	/*
-    if(m_cur == 0)
-		return ;
-
-	--m_cur ;
-	VSplit<PFP>* vs = m_splits[m_cur] ; // get the split node
-
-	Dart d = vs->getEdge() ;
-	Dart dd = m_map.phi2(d) ; 		// get some darts
-	Dart dd2 = vs->getRightEdge() ;
-	Dart d2 = vs->getLeftEdge() ;
-	Dart d1 = m_map.phi2(d2) ;
-	Dart dd1 = m_map.phi2(dd2) ;
-
-	unsigned int v1 = m_map.template getEmbedding<VERTEX>(d) ;				// get the embedding
-	unsigned int v2 = m_map.template getEmbedding<VERTEX>(dd) ;			// of the new vertices
-	unsigned int e1 = m_map.template getEmbedding<EDGE>(m_map.phi1(d)) ;
-	unsigned int e2 = m_map.template getEmbedding<EDGE>(m_map.phi_1(d)) ;	// and new edges
-	unsigned int e3 = m_map.template getEmbedding<EDGE>(m_map.phi1(dd)) ;
-	unsigned int e4 = m_map.template getEmbedding<EDGE>(m_map.phi_1(dd)) ;
-
-	vertexSplit(vs) ; // split vertex
-
-	m_map.template setOrbitEmbedding<VERTEX>(d, v1) ;		// embed the
-	m_map.template setOrbitEmbedding<VERTEX>(dd, v2) ;	// new vertices
-	m_map.template setOrbitEmbedding<EDGE>(d1, e1) ;
-	m_map.template setOrbitEmbedding<EDGE>(d2, e2) ;		// and new edges
-	m_map.template setOrbitEmbedding<EDGE>(dd1, e3) ;
-	m_map.template setOrbitEmbedding<EDGE>(dd2, e4) ;
-    */
-
     int res = 0;
     if(n!=NULL && n->isActive()) {
         //Si n fait partie du front
@@ -444,13 +344,11 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             n->setActive(false);
             child_left->setActive(true);
             child_right->setActive(true);
-            m_active_nodes.push_back(child_left);
-            child_left->setCurrentPosition(--m_active_nodes.end());
-            m_active_nodes.push_back(child_right);
-            child_right->setCurrentPosition(--m_active_nodes.end());
+            m_active_nodes.push_front(child_left);
+            child_left->setCurrentPosition(m_active_nodes.begin());
+            m_active_nodes.push_front(child_right);
+            child_right->setCurrentPosition(m_active_nodes.begin());
             res++;
-
-            drawFront(); 
         }
     }
     return res;
