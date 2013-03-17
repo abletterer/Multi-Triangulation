@@ -44,23 +44,19 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
 	m_map(map), positionsTable(position), inactiveMarker(inactive), dartSelect(inactiveMarker)
 {
 	CGoGNout << "  creating approximator .." << CGoGNflush ;
-
 	std::vector<VertexAttribute< typename PFP::VEC3>* > pos_v ;
 	pos_v.push_back(&positionsTable) ;
 	m_approximators.push_back(new Algo::Surface::Decimation::Approximator_MidEdge<PFP>(m_map, pos_v)) ;
-
 	CGoGNout << "..done" << CGoGNendl ;
 
-	CGoGNout << "  creating selector.." << CGoGNflush ;
-			
-    m_selector = new Algo::Surface::Decimation::EdgeSelector_Length<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
-	
+
+	CGoGNout << "  creating selector.." << CGoGNflush ;			
+    m_selector = new Algo::Surface::Decimation::EdgeSelector_Length<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;	
     CGoGNout << "..done" << CGoGNendl ;
 
 	m_initOk = true ;
 
 	CGoGNout << "  initializing approximators.." << CGoGNflush ;
-
 	for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 	{
 		if(! (*it)->init())
@@ -68,18 +64,19 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
 		if((*it)->getApproximatedAttributeName() == "position")
 			m_positionApproximator = reinterpret_cast<Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>*>(*it) ;
 	}
-
 	CGoGNout << "..done" << CGoGNendl ;
 
 	CGoGNout << "  initializing selector.." << CGoGNflush ;
-
 	m_initOk = m_selector->init() ;
-	
     CGoGNout << "..done" << CGoGNendl ;
     
     noeud = m_map.template getAttribute<EmbNode, VERTEX>("noeud") ;
 	if(!noeud.isValid())
 		noeud = m_map.template addAttribute<EmbNode, VERTEX>("noeud") ;
+	
+    /*CGoGNout << "  initializing bounding box.." << CGoGNflush;
+    bb = Algo::Geometry::computeBoundingBox<PFP>(m_map, m_positions_bb);
+    CGoGNout << "..done" << CGoGNendl;*/
 }
 
 template <typename PFP>
@@ -109,7 +106,7 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	unsigned int nbVertices = m_map.template getNbOrbits<VERTEX>() ;
 	unsigned int nbWantedVertices = nbVertices * percentWantedVertices / 100 ;
     
-    CGoGNout << "  addingNodes.." << CGoGNflush ;
+    CGoGNout << "  initializing nodes.." << CGoGNflush ;
     addNodes();
 	CGoGNout << "..done" << CGoGNendl ;
 	
@@ -204,7 +201,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 	CGoGNout << "..done (" << nbVertices << " vertices)" << CGoGNendl ;
     CGoGNout << m_active_nodes.size() << " active nodes" << CGoGNendl;
     CGoGNout << "Hauteur du plus grand arbre de la forêt : " << m_height << CGoGNendl;
-    drawFront();
 }
 
 template <typename PFP>

@@ -30,6 +30,7 @@
 #include "Algo/Decimation/geometryApproximator.h"
 #include "Algo/Decimation/geometryPredictor.h"
 #include "Algo/Decimation/colorPerVertexApproximator.h"
+#include "Algo/Geometry/boundingbox.h"
 
 #include "Utils/quantization.h"
 #include "Node.h"
@@ -57,21 +58,28 @@ public:
 
 private:
 	MAP& m_map ;
-	VertexAttribute<typename PFP::VEC3>& positionsTable ;
+	VertexAttribute<typename PFP::VEC3>& positionsTable ;   //Position des sommets du modèle 
     
-    typedef NoMathIOAttribute<Algo::Surface::VDPMesh::NodeInfo> EmbNode;
-    VertexAttribute<EmbNode> noeud;
-
+    //Marqueurs de darts inactifs
 	DartMarker& inactiveMarker ;
 	SelectorUnmarked dartSelect ;
 
 	Algo::Surface::Decimation::EdgeSelector<PFP>* m_selector ;
 	std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*> m_approximators ;
-    std::list<Node*> m_active_nodes;
-
-	Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionApproximator ;
+	Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>* m_positionApproximator ; 
 
 	bool m_initOk ;
+    
+    //Liste des noeuds actifs (front de la forêt)
+    std::list<Node*> m_active_nodes;
+
+    //Attribut de sommet Node
+    typedef NoMathIOAttribute<Algo::Surface::VDPMesh::NodeInfo> EmbNode;
+    VertexAttribute<EmbNode> noeud;
+
+    //Boite englobante dans laquelle le modèle est plus affiné
+    /*Geom::BoundingBox<typename PFP::VEC3> m_bb;
+    VertexAttribute<typename PFP::VEC3>& m_positions_bb;*/
 
     //DEBUG
     int m_height; //Hauteur de l'arbre le plus grand de la forêt
