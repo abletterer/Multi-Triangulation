@@ -231,10 +231,13 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
+    CGoGNout << "COARSEN" << CGoGNendl;
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
-        CGoGNout << " COARSEN : " << (*it)->getVertex() << CGoGNendl;
+        CGoGNout << "Noeud : " << (*it)->getVertex() << CGoGNendl;
+        drawFront();
         coarsen(*it);
     }
+    drawFront();
 }
 
 template <typename PFP>
@@ -287,10 +290,12 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 
 template <typename PFP>
 void VDProgressiveMesh<PFP>::refine() {
+    CGoGNout << "REFINE" << CGoGNendl;
+    drawFront();
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
         refine(*it);
     }
-    CGoGNout << "Apres refine : " << m_active_nodes.size() << CGoGNendl;
+    drawFront();
 }
 
 template <typename PFP>
@@ -383,6 +388,7 @@ void VDProgressiveMesh<PFP>::drawTree(Node* node) {
 template <typename PFP>
 void VDProgressiveMesh<PFP>::drawFront() {
     CGoGNout << "Front courant : " << CGoGNendl;
+    CGoGNout << "  " << m_active_nodes.size() << " noeuds actifs" << CGoGNendl;
     for(std::list<Node*>::iterator it = m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
         if(it!=--m_active_nodes.end())
             CGoGNout << (*it)->getVertex() << " | " << CGoGNflush;
