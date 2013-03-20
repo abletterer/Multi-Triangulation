@@ -75,7 +75,7 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
 		noeud = m_map.template addAttribute<EmbNode, VERTEX>("noeud") ;
 	
     /*CGoGNout << "  initializing bounding box.." << CGoGNflush;
-    bb = Algo::Geometry::computeBoundingBox<PFP>(m_map, m_positions_bb);
+    m_bb = Algo::Geometry::computeBoundingBox<PFP>(m_map, m_positions_bb);
     CGoGNout << "..done" << CGoGNendl;*/
 }
 

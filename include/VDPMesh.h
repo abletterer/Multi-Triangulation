@@ -34,6 +34,7 @@
 
 #include "Utils/quantization.h"
 #include "Node.h"
+#include "Box.h"
 
 namespace CGoGN
 {
@@ -78,8 +79,7 @@ private:
     VertexAttribute<EmbNode> noeud;
 
     //Boite englobante dans laquelle le modèle est plus affiné
-    /*Geom::BoundingBox<typename PFP::VEC3> m_bb;
-    VertexAttribute<typename PFP::VEC3>& m_positions_bb;*/
+    Box m_bb;
 
     //DEBUG
     int m_height; //Hauteur de l'arbre le plus grand de la forêt
