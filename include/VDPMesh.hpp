@@ -155,8 +155,8 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         
         /*Ajout du nouveau noeud au front courant*/
         n->setActive(true);
-        m_active_nodes.push_front(n);
-        n->setCurrentPosition(m_active_nodes.begin());
+        m_active_nodes.push_back(n);
+        n->setCurrentPosition(--m_active_nodes.end());
         
         n->setHeight(height+1);
         
@@ -233,9 +233,8 @@ template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
     CGoGNout << "COARSEN" << CGoGNendl;
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
-        CGoGNout << "Noeud : " << (*it)->getVertex() << CGoGNendl;
-        drawFront();
-        coarsen(*it);
+        if(coarsen(*it)==1)
+            break;
     }
     drawFront();
 }
@@ -257,7 +256,7 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 VSplit<PFP>* vs = parent->getVSplit(); 
                 Dart d2 = vs->getLeftEdge();
                 Dart dd2 = vs->getRightEdge();
-                /*Dart d1 = vs->getOppositeLeftEdge();
+                Dart d1 = vs->getOppositeLeftEdge();
                 Dart dd1 = vs->getOppositeRightEdge();
 
                 if( inactiveMarker.isMarked(d1)
@@ -265,7 +264,6 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 ||  inactiveMarker.isMarked(dd1)
                 ||  inactiveMarker.isMarked(dd2))
                     return res;
-                */
                 
                 edgeCollapse(vs);
 
@@ -279,8 +277,8 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 child_left->setActive(false);
                 child_right->setActive(false);
                 parent->setActive(true);
-                m_active_nodes.push_front(parent);
-                parent->setCurrentPosition(m_active_nodes.begin());
+                m_active_nodes.push_back(parent);
+                parent->setCurrentPosition(--m_active_nodes.end());
                 ++res;
             }
         }
@@ -291,9 +289,9 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::refine() {
     CGoGNout << "REFINE" << CGoGNendl;
-    drawFront();
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
-        refine(*it);
+        if(refine(*it)==1)
+            break;
     }
     drawFront();
 }
@@ -348,10 +346,10 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             n->setActive(false);
             child_left->setActive(true);
             child_right->setActive(true);
-            m_active_nodes.push_front(child_left);
-            child_left->setCurrentPosition(m_active_nodes.begin());
-            m_active_nodes.push_front(child_right);
-            child_right->setCurrentPosition(m_active_nodes.begin());
+            m_active_nodes.push_back(child_left);
+            child_left->setCurrentPosition(--m_active_nodes.end());
+            m_active_nodes.push_back(child_right);
+            child_right->setCurrentPosition(--m_active_nodes.end());
             res++;
         }
     }
