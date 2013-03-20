@@ -232,6 +232,7 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
+        CGoGNout << " COARSEN : " << (*it)->getVertex() << CGoGNendl;
         coarsen(*it);
     }
 }
@@ -240,28 +241,29 @@ template <typename PFP>
 int VDProgressiveMesh<PFP>::coarsen(Node* n)
 {
     int res = 0;
-    if(n!=NULL && n->isActive()) {
+    if(n && n->isActive()) {
         //Si n fait partie du front
-        if(n->getParent()!=NULL && !n->getParent()->isActive()) {
+        Node* parent = n->getParent();
+        if(parent && !parent->isActive()) {
             /*Si le noeud parent existe et qu'il ne fait pas partie du front*/
-            Node* parent = n->getParent();
             Node* child_left = parent->getLeftChild();
             Node* child_right = parent->getRightChild();
-            if(child_left!=NULL && child_left->isActive()
-            && child_right!=NULL && child_right->isActive()) {
+            if(child_left && child_left->isActive()
+            && child_right && child_right->isActive()) {
                 //Si n a un noeud parent et que celui-ci ne fait pas partie du front
                 VSplit<PFP>* vs = parent->getVSplit(); 
                 Dart d2 = vs->getLeftEdge();
                 Dart dd2 = vs->getRightEdge();
-                Dart d1 = vs->getOppositeLeftEdge();
+                /*Dart d1 = vs->getOppositeLeftEdge();
                 Dart dd1 = vs->getOppositeRightEdge();
 
-                /*if( inactiveMarker.isMarked(d1)
+                if( inactiveMarker.isMarked(d1)
                 ||  inactiveMarker.isMarked(d2)
                 ||  inactiveMarker.isMarked(dd1)
                 ||  inactiveMarker.isMarked(dd2))
-                    return res;*/
-
+                    return res;
+                */
+                
                 edgeCollapse(vs);
 
                 m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
@@ -288,18 +290,19 @@ void VDProgressiveMesh<PFP>::refine() {
     for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
         refine(*it);
     }
+    CGoGNout << "Apres refine : " << m_active_nodes.size() << CGoGNendl;
 }
 
 template <typename PFP>
 int VDProgressiveMesh<PFP>::refine(Node* n)
 {
     int res = 0;
-    if(n!=NULL && n->isActive()) {
+    if(n && n->isActive()) {
         //Si n fait partie du front
         Node* child_left = n->getLeftChild();
         Node* child_right = n->getRightChild();
-        if(child_left!=NULL && child_right!=NULL 
-        && !child_left->isActive() && !child_right->isActive()) {
+        if( child_left && !child_left->isActive() 
+        &&  child_right && !child_right->isActive()) {
             //Si n a deux fils et que ceux-ci ne font pas partie du front
             VSplit<PFP>* vs = n->getVSplit();
 
@@ -363,15 +366,17 @@ void VDProgressiveMesh<PFP>::drawForest() {
 template <typename PFP>
 void VDProgressiveMesh<PFP>::drawTree(Node* node) {
     CGoGNout << node->getVertex() << CGoGNflush;
-    if(node->getLeftChild()!=NULL) {
-        CGoGNout << " G( " << CGoGNflush;
-        drawTree(node->getLeftChild());
-        CGoGNout << " ) " << CGoGNflush;
-    }
-    if(node->getRightChild()!=NULL) {
-        CGoGNout << " D( " << CGoGNflush;
-        drawTree(node->getRightChild());
-        CGoGNout << " ) " << CGoGNflush;
+    if(node) {
+        if(node->getLeftChild()) {
+            CGoGNout << " G( " << CGoGNflush;
+            drawTree(node->getLeftChild());
+            CGoGNout << " ) " << CGoGNflush;
+        }
+        if(node->getRightChild()) {
+            CGoGNout << " D( " << CGoGNflush;
+            drawTree(node->getRightChild());
+            CGoGNout << " ) " << CGoGNflush;
+        }
     }
 }
 
