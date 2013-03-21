@@ -14,6 +14,7 @@ namespace VDPMesh {
 struct PFP: public PFP_STANDARD
 {
     typedef EmbeddedMap2 MAP;
+    typedef Geom::Vec3f VEC3;
 };
 
 typedef PFP::MAP MAP;

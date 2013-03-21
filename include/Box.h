@@ -28,7 +28,8 @@ struct Box {
         void setPosMax(PFP::VEC3 pos_max) { m_pos_max = pos_max; }
 
         bool contains(PFP::VEC3 pos) {
-            return  m_pos_min <= pos && pos <= m_pos_max;
+            /*return  m_pos_min <= pos && pos <= m_pos_max;*/
+        	return false;
         }
     private:
         PFP::VEC3 m_pos_min;    //Position [xmin;ymin;zmin]
