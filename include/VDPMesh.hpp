@@ -41,7 +41,7 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
 		MAP& map, DartMarker& inactive,
 		VertexAttribute<typename PFP::VEC3>& position
 	) :
-	m_map(map), positionsTable(position), inactiveMarker(inactive), dartSelect(inactiveMarker)
+	m_map(map), positionsTable(position), inactiveMarker(inactive), dartSelect(inactiveMarker), m_height(0)
 {
 	CGoGNout << "  creating approximator .." << CGoGNflush ;
 	std::vector<VertexAttribute< typename PFP::VEC3>* > pos_v ;
@@ -155,8 +155,8 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         
         /*Ajout du nouveau noeud au front courant*/
         n->setActive(true);
-        m_active_nodes.push_back(n);
-        n->setCurrentPosition(--m_active_nodes.end());
+        m_active_nodes.push_front(n);
+        n->setCurrentPosition(m_active_nodes.begin());
         
         n->setHeight(height+1);
         
@@ -232,9 +232,17 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
     CGoGNout << "COARSEN" << CGoGNendl;
-    for(std::list<Node*>::iterator it=m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
-        if(coarsen(*it)==1)
-            break;
+    std::list<Node*>::iterator it_back;
+    std::list<Node*>::iterator it=m_active_nodes.begin();
+    while(it != m_active_nodes.end()) {
+    	it_back = it;
+    	std::advance(it_back, 2);
+        if(coarsen(*it)==1) {
+        	it = it_back;
+        }
+        else {
+        	++it;
+        }
     }
     drawFront();
 }
@@ -254,6 +262,7 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
             && child_right && child_right->isActive()) {
                 //Si n a un noeud parent et que celui-ci ne fait pas partie du front
                 VSplit<PFP>* vs = parent->getVSplit(); 
+                Dart d = vs->getEdge();
                 Dart d2 = vs->getLeftEdge();
                 Dart dd2 = vs->getRightEdge();
                 Dart d1 = vs->getOppositeLeftEdge();
@@ -264,12 +273,30 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 ||  inactiveMarker.isMarked(dd1)
                 ||  inactiveMarker.isMarked(dd2))
                     return res;
-                
+
+                CGoGNout << "COARSEN" << CGoGNendl;
+
+                CGoGNout << "  Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
+                CGoGNout << "  Dart phi1(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d)) << CGoGNendl;
+                CGoGNout << "  Dart d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+                CGoGNout << "  Dart d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+				CGoGNout << "  Dart dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+				CGoGNout << "  Dart dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+				CGoGNout << "----------------------" << CGoGNendl;
+
                 edgeCollapse(vs);
 
                 m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
 	            m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
                 m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
+
+                CGoGNout << "  Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
+                CGoGNout << "  Dart phi1(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d)) << CGoGNendl;
+                CGoGNout << "  Dart d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+                CGoGNout << "  Dart d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+				CGoGNout << "  Dart dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+				CGoGNout << "  Dart dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+				CGoGNout << "----------------------" << CGoGNendl;
         
                 //Mise a jour des informations de l'arbre
                 m_active_nodes.erase(child_left->getCurrentPosition());
@@ -277,8 +304,8 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 child_left->setActive(false);
                 child_right->setActive(false);
                 parent->setActive(true);
-                m_active_nodes.push_back(parent);
-                parent->setCurrentPosition(--m_active_nodes.end());
+                m_active_nodes.push_front(parent);
+                parent->setCurrentPosition(m_active_nodes.begin());
                 ++res;
             }
         }
@@ -289,9 +316,14 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::refine() {
     CGoGNout << "REFINE" << CGoGNendl;
-    for(std::list<Node*>::iterator it=m_active_nodes.begin(); it!=m_active_nodes.end(); ++it) {
-        if(refine(*it)==1)
-            break;
+    std::list<Node*>::iterator it_back;
+    std::list<Node*>::iterator it=m_active_nodes.begin();
+    while(it!=m_active_nodes.end()) {
+    	it_back = it;
+    	++it_back;
+        refine(*it);
+		it = it_back;
+
     }
     drawFront();
 }
@@ -346,10 +378,10 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             n->setActive(false);
             child_left->setActive(true);
             child_right->setActive(true);
-            m_active_nodes.push_back(child_left);
-            child_left->setCurrentPosition(--m_active_nodes.end());
-            m_active_nodes.push_back(child_right);
-            child_right->setCurrentPosition(--m_active_nodes.end());
+            m_active_nodes.push_front(child_left);
+            child_left->setCurrentPosition(m_active_nodes.begin());
+            m_active_nodes.push_front(child_right);
+            child_right->setCurrentPosition(m_active_nodes.begin());
             res++;
         }
     }

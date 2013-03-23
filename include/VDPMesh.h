@@ -32,6 +32,10 @@
 #include "Algo/Decimation/colorPerVertexApproximator.h"
 #include "Algo/Geometry/boundingbox.h"
 
+#include <iterator>
+#include <vector>
+#include <list>
+
 #include "Utils/quantization.h"
 #include "Node.h"
 #include "Box.h"
