@@ -232,12 +232,12 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
     CGoGNout << "COARSEN" << CGoGNendl;
-    std::list<Node*>::iterator it_back;
     std::list<Node*>::iterator it=m_active_nodes.begin();
+    std::list<Node*>::iterator it_back;
     while(it != m_active_nodes.end()) {
     	it_back = it;
     	std::advance(it_back, 2);
-        if(coarsen(*it)==1) {
+        if(coarsen(*it)==1 && it!=--m_active_nodes.end()) {
         	it = it_back;
         }
         else {
@@ -274,15 +274,13 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 ||  inactiveMarker.isMarked(dd2))
                     return res;
 
-                CGoGNout << "COARSEN" << CGoGNendl;
-
-                CGoGNout << "  Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-                CGoGNout << "  Dart phi1(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d)) << CGoGNendl;
-                CGoGNout << "  Dart d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-                CGoGNout << "  Dart d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-				CGoGNout << "  Dart dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-				CGoGNout << "  Dart dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-				CGoGNout << "----------------------" << CGoGNendl;
+//                CGoGNout << "  Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
+//                CGoGNout << "  Dart phi1(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d)) << CGoGNendl;
+//                CGoGNout << "  Dart d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+//                CGoGNout << "  Dart d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+//				CGoGNout << "  Dart dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+//				CGoGNout << "  Dart dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+//				CGoGNout << "----------------------" << CGoGNendl;
 
                 edgeCollapse(vs);
 
@@ -290,13 +288,13 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 	            m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
                 m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
 
-                CGoGNout << "  Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-                CGoGNout << "  Dart phi1(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d)) << CGoGNendl;
-                CGoGNout << "  Dart d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-                CGoGNout << "  Dart d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-				CGoGNout << "  Dart dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-				CGoGNout << "  Dart dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-				CGoGNout << "----------------------" << CGoGNendl;
+//                CGoGNout << "  Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
+//                CGoGNout << "  Dart phi1(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d)) << CGoGNendl;
+//                CGoGNout << "  Dart d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
+//                CGoGNout << "  Dart d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+//				CGoGNout << "  Dart dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
+//				CGoGNout << "  Dart dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+//				CGoGNout << "----------------------" << CGoGNendl;
         
                 //Mise a jour des informations de l'arbre
                 m_active_nodes.erase(child_left->getCurrentPosition());
@@ -323,7 +321,6 @@ void VDProgressiveMesh<PFP>::refine() {
     	++it_back;
         refine(*it);
 		it = it_back;
-
     }
     drawFront();
 }
