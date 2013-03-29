@@ -49,7 +49,8 @@ VDPMesh_App::VDPMesh_App() :
 	m_vectorShader(NULL),
 	m_simpleColorShader(NULL),
 	m_pointSprite(NULL),
-    m_inactiveMarker(myMap)
+    m_inactiveMarker(myMap),
+    m_pmesh(NULL)
 {
 	normalScaleFactor = 1.0f ;
 	vertexScaleFactor = 0.1f ;
@@ -194,6 +195,13 @@ void VDPMesh_App::cb_redraw()
 		m_vectorShader->setScale(size) ;
 		glLineWidth(1.0f) ;
 		m_render->draw(m_vectorShader, Algo::Render::GL2::POINTS) ;
+	}
+
+	if(m_pmesh && m_pmesh->getDrawer()) {
+		CGoGNout << "Coucou" << CGoGNendl;
+		Utils::Drawer* drawer = m_pmesh->getDrawer();
+		drawer->newList(GL_COMPILE_AND_EXECUTE);
+
 	}
 }
 

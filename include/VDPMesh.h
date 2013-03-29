@@ -32,6 +32,8 @@
 #include "Algo/Decimation/colorPerVertexApproximator.h"
 #include "Algo/Geometry/boundingbox.h"
 
+#include "Utils/drawer.h"
+
 #include <iterator>
 #include <vector>
 #include <list>
@@ -83,7 +85,8 @@ private:
     VertexAttribute<EmbNode> noeud;
 
     //Boite englobante dans laquelle le modèle est plus affiné
-    Box m_bb;
+    Box* m_bb;
+    Utils::Drawer* m_drawer;
 
     //DEBUG
     int m_height; //Hauteur de l'arbre le plus grand de la forêt
@@ -105,6 +108,9 @@ public:
 	Algo::Surface::Decimation::EdgeSelector<PFP>* selector() { return m_selector ; }
 	std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>& approximators() { return m_approximators ; }
 
+	Box* getInterestBox() { return m_bb; }
+	Utils::Drawer* getDrawer() { return m_drawer; }
+
 	void edgeCollapse(VSplit<PFP>* vs) ;
 	void vertexSplit(VSplit<PFP>* vs) ;
 
@@ -113,6 +119,8 @@ public:
 
 	int coarsen(Node* n) ;
 	int refine(Node* n) ;
+
+	void updateDrawer();
 
     /*DEBUG FUNCTIONS*/
     int getForestHeight() { return m_height; }
