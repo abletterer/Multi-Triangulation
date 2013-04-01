@@ -14,7 +14,7 @@ namespace VDPMesh {
  */
 struct Box {
     public:
-        Box(PFP::VEC3 pos_min = PFP::VEC3(-1., -1., -1.), PFP::VEC3 pos_max = PFP::VEC3(1., 1., 1.))
+        Box(PFP::VEC3 pos_min = PFP::VEC3(-3., -3., -3.), PFP::VEC3 pos_max = PFP::VEC3(3., 3., 3.))
            : m_pos_min(pos_min), m_pos_max(pos_max)
         {} 
         

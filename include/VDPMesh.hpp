@@ -258,8 +258,8 @@ template <typename PFP>
 int VDProgressiveMesh<PFP>::coarsen(Node* n)
 {
     int res = 0;
-    if(n && n->isActive()) {
-        //Si n fait partie du front
+    if(n && n->isActive() && !m_bb->contains(positionsTable[n->getVertex()])) {
+        //Si n fait partie du front et qu'il n'est pas contenu dans la boîte d'intérêt
         Node* parent = n->getParent();
         if(parent && !parent->isActive()) {
             /*Si le noeud parent existe et qu'il ne fait pas partie du front*/
@@ -336,8 +336,8 @@ template <typename PFP>
 int VDProgressiveMesh<PFP>::refine(Node* n)
 {
     int res = 0;
-    if(n && n->isActive()) {
-        //Si n fait partie du front
+    if(n && n->isActive() && m_bb->contains(positionsTable[n->getVertex()])) {
+        //Si n fait partie du front et qu'il est contenu dans la boîte d'intérê
         Node* child_left = n->getLeftChild();
         Node* child_right = n->getRightChild();
         if( child_left && !child_left->isActive() 

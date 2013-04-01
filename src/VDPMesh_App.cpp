@@ -199,19 +199,19 @@ void VDPMesh_App::cb_redraw()
 
 	if(m_pmesh && m_pmesh->getDrawer()) {
 		Utils::Drawer* drawer = m_pmesh->getDrawer();
+
+		VEC3 a = m_pmesh->getInterestBox()->getPosMin();
+		VEC3 b = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
+		VEC3 c = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
+		VEC3 d = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
+		VEC3 e = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
+		VEC3 f = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
+		VEC3 g = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
+		VEC3 h = m_pmesh->getInterestBox()->getPosMax();
 		drawer->begin(GL_POINTS);
 			drawer->lineWidth(7.0f);
 			drawer->pointSize(9.0f);
 			drawer->color3f(0.0f,0.7f,0.0f);
-
-			VEC3 a = m_pmesh->getInterestBox()->getPosMin();
-			VEC3 b = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
-			VEC3 c = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
-			VEC3 d = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
-			VEC3 e = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
-			VEC3 f = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
-			VEC3 g = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
-			VEC3 h = m_pmesh->getInterestBox()->getPosMax();
 
 			/*glVertex3f(a[0], a[1], a[2]); glVertex3f(b[0], b[1], b[2]);
 			glVertex3f(a[0], a[1], a[2]); glVertex3f(d[0], d[1], d[2]);
