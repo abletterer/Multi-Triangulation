@@ -199,45 +199,7 @@ void VDPMesh_App::cb_redraw()
 
 	if(m_pmesh && m_pmesh->getDrawer()) {
 		Utils::Drawer* drawer = m_pmesh->getDrawer();
-
-		VEC3 a = m_pmesh->getInterestBox()->getPosMin();
-		VEC3 b = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
-		VEC3 c = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
-		VEC3 d = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMin()[2]);
-		VEC3 e = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMax()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
-		VEC3 f = VEC3(m_pmesh->getInterestBox()->getPosMin()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
-		VEC3 g = VEC3(m_pmesh->getInterestBox()->getPosMax()[0], m_pmesh->getInterestBox()->getPosMin()[1], m_pmesh->getInterestBox()->getPosMax()[2]);
-		VEC3 h = m_pmesh->getInterestBox()->getPosMax();
-		drawer->begin(GL_POINTS);
-			drawer->lineWidth(7.0f);
-			drawer->pointSize(9.0f);
-			drawer->color3f(0.0f,0.7f,0.0f);
-
-			/*glVertex3f(a[0], a[1], a[2]); glVertex3f(b[0], b[1], b[2]);
-			glVertex3f(a[0], a[1], a[2]); glVertex3f(d[0], d[1], d[2]);
-			glVertex3f(a[0], a[1], a[2]); glVertex3f(f[0], f[1], f[2]);
-
-			glVertex3f(c[0], c[1], c[2]); glVertex3f(d[0], d[1], d[2]);
-			glVertex3f(c[0], c[1], c[2]); glVertex3f(b[0], b[1], b[2]);
-			glVertex3f(c[0], c[1], c[2]); glVertex3f(h[0], h[1], h[2]);
-
-			glVertex3f(g[0], g[1], g[2]); glVertex3f(b[0], b[1], b[2]);
-			glVertex3f(g[0], g[1], g[2]); glVertex3f(f[0], f[1], f[2]);
-			glVertex3f(g[0], g[1], g[2]); glVertex3f(h[0], h[1], h[2]);
-
-			glVertex3f(e[0], e[1], e[2]); glVertex3f(d[0], d[1], d[2]);
-			glVertex3f(e[0], e[1], e[2]); glVertex3f(f[0], f[1], f[2]);
-			glVertex3f(e[0], e[1], e[2]); glVertex3f(h[0], h[1], h[2]);*/
-
-			glVertex3f(a[0], a[1], a[2]);
-			glVertex3f(b[0], b[1], b[2]);
-			glVertex3f(c[0], c[1], c[2]);
-			glVertex3f(d[0], d[1], d[2]);
-			glVertex3f(e[0], e[1], e[2]);
-			glVertex3f(f[0], f[1], f[2]);
-			glVertex3f(g[0], g[1], g[2]);
-			glVertex3f(h[0], h[1], h[2]);
-		drawer->end();
+		drawer->callList();
 	}
 }
 

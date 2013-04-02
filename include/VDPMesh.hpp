@@ -239,17 +239,36 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
     CGoGNout << "COARSEN" << CGoGNendl;
-    std::list<Node*>::iterator it=m_active_nodes.begin();
+    std::list<Node*>::iterator it;
     std::list<Node*>::iterator it_back;
-    while(it != m_active_nodes.end()) {
-    	it_back = it;
-    	std::advance(it_back, 2);
-        if(coarsen(*it)==1 && it!=--m_active_nodes.end()) {
-        	it = it_back;
-        }
-        else {
-        	++it;
-        }
+    int compteur = 0;
+    bool stop = false;
+    while(!stop) {
+    	it=m_active_nodes.begin();
+		while(it != m_active_nodes.end()) {
+			it_back = it;
+			std::advance(it_back, 2);
+			if(coarsen(*it)==1) {
+				//Une modification a été faite
+				if(it != --m_active_nodes.end()) {
+					it = it_back;
+				}
+				++compteur;
+			}
+			else {
+				++it;
+			}
+		}
+		if(compteur==0) {
+			//Aucune modification n'a été faite, état stationnaire
+			//Arrêt de la simplification du maillage
+			stop = true;
+		}
+		else {
+			//Au moins une modification a été faite
+			//On recommence la simplification du maillage
+			compteur = 0;
+		}
     }
     drawFront();
 }
@@ -258,7 +277,7 @@ template <typename PFP>
 int VDProgressiveMesh<PFP>::coarsen(Node* n)
 {
     int res = 0;
-    if(n && n->isActive() && !m_bb->contains(positionsTable[n->getVertex()])) {
+    if(n && n->isActive()) {
         //Si n fait partie du front et qu'il n'est pas contenu dans la boîte d'intérêt
         Node* parent = n->getParent();
         if(parent && !parent->isActive()) {
@@ -322,12 +341,30 @@ template <typename PFP>
 void VDProgressiveMesh<PFP>::refine() {
     CGoGNout << "REFINE" << CGoGNendl;
     std::list<Node*>::iterator it_back;
-    std::list<Node*>::iterator it=m_active_nodes.begin();
-    while(it!=m_active_nodes.end()) {
-    	it_back = it;
-    	++it_back;
-        refine(*it);
-		it = it_back;
+    std::list<Node*>::iterator it;
+    int compteur = 0;
+    bool stop = false;
+    while(!stop) {
+    	it=m_active_nodes.begin();
+		while(it!=m_active_nodes.end()) {
+			it_back = it;
+			++it_back;
+			if(refine(*it)==1) {
+				//Une modification a été faite
+				++compteur;
+			}
+			it = it_back;
+		}
+		if(compteur==0) {
+			//Aucune modification n'a été faite, état stationnaire
+			//Arrêt de l'affinement du maillage
+			stop = true;
+		}
+		else {
+			//Au moins une modification a été faite
+			//On recommence l'affinement du maillage
+			compteur = 0;
+		}
     }
     drawFront();
 }
@@ -336,7 +373,7 @@ template <typename PFP>
 int VDProgressiveMesh<PFP>::refine(Node* n)
 {
     int res = 0;
-    if(n && n->isActive() && m_bb->contains(positionsTable[n->getVertex()])) {
+    if(n && n->isActive()) {
         //Si n fait partie du front et qu'il est contenu dans la boîte d'intérê
         Node* child_left = n->getLeftChild();
         Node* child_right = n->getRightChild();
