@@ -224,14 +224,52 @@ void VDPMesh_App::cb_Save()
 
 void VDPMesh_App::cb_keyPress(int keycode)
 {
+	m_pmesh->getInterestBox()->print();
     switch(keycode)
     {
     	case 'c' :
     		myMap.check();
     		break;
+    	case 'q' :
+    		m_pmesh->getInterestBox()->incPosMax(0.2, 0);
+    		m_pmesh->getInterestBox()->incPosMin(0.2, 0);
+    		break;
+    	case 'd' :
+    		m_pmesh->getInterestBox()->decPosMax(0.2, 0);
+    		m_pmesh->getInterestBox()->decPosMin(0.2, 0);
+    		break;
+    	case 'z' :
+    		m_pmesh->getInterestBox()->incPosMax(0.2, 1);
+    		m_pmesh->getInterestBox()->incPosMin(0.2, 1);
+    		break;
+    	case 's' :
+    		m_pmesh->getInterestBox()->decPosMax(0.2, 1);
+    		m_pmesh->getInterestBox()->decPosMin(0.2, 1);
+    		break;
+
+    	case 'p' :
+    		m_pmesh->getInterestBox()->incPosMax(0.2, 0);
+    		m_pmesh->getInterestBox()->incPosMax(0.2, 1);
+    		m_pmesh->getInterestBox()->incPosMax(0.2, 2);
+    		m_pmesh->getInterestBox()->decPosMin(0.2, 0);
+    		m_pmesh->getInterestBox()->decPosMin(0.2, 1);
+    		m_pmesh->getInterestBox()->decPosMin(0.2, 2);
+    		break;
+    	case 'm' :
+			m_pmesh->getInterestBox()->decPosMax(0.2, 0);
+			m_pmesh->getInterestBox()->decPosMax(0.2, 1);
+			m_pmesh->getInterestBox()->decPosMax(0.2, 2);
+			m_pmesh->getInterestBox()->incPosMin(0.2, 0);
+			m_pmesh->getInterestBox()->incPosMin(0.2, 1);
+			m_pmesh->getInterestBox()->incPosMin(0.2, 2);
+    		break;
     	default:
     		break;
     }
+    m_pmesh->getInterestBox()->print();
+    m_pmesh->updateDrawer();
+    m_pmesh->updateRefinement();
+    updateMesh();
 }
 
 void VDPMesh_App::importMesh(std::string& filename)

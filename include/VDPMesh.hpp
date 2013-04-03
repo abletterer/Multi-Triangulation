@@ -461,36 +461,27 @@ void VDProgressiveMesh<PFP>::updateDrawer() {
 	VEC3 g = VEC3(m_bb->getPosMax()[0], m_bb->getPosMin()[1], m_bb->getPosMax()[2]);
 	VEC3 h = m_bb->getPosMax();
 
-	m_drawer->newList(GL_COMPILE_AND_EXECUTE);
-	m_drawer->begin(GL_POINTS);
-		m_drawer->lineWidth(7.0f);
-		m_drawer->pointSize(9.0f);
+	m_drawer->newList(GL_COMPILE);
+	m_drawer->begin(GL_LINES);
+		m_drawer->lineWidth(2.0f);
 		m_drawer->color3f(0.0f, 1.f, 0.0f);
-		/*glVertex3f(a[0], a[1], a[2]); glVertex3f(b[0], b[1], b[2]);
-		glVertex3f(a[0], a[1], a[2]); glVertex3f(d[0], d[1], d[2]);
-		glVertex3f(a[0], a[1], a[2]); glVertex3f(f[0], f[1], f[2]);
+		m_drawer->vertex3f(a[0], a[1], a[2]); m_drawer->vertex3f(b[0], b[1], b[2]);
+		m_drawer->vertex3f(a[0], a[1], a[2]); m_drawer->vertex3f(d[0], d[1], d[2]);
+		m_drawer->vertex3f(a[0], a[1], a[2]); m_drawer->vertex3f(f[0], f[1], f[2]);
 
-		glVertex3f(c[0], c[1], c[2]); glVertex3f(d[0], d[1], d[2]);
-		glVertex3f(c[0], c[1], c[2]); glVertex3f(b[0], b[1], b[2]);
-		glVertex3f(c[0], c[1], c[2]); glVertex3f(h[0], h[1], h[2]);
+		m_drawer->vertex3f(c[0], c[1], c[2]); m_drawer->vertex3f(d[0], d[1], d[2]);
+		m_drawer->vertex3f(c[0], c[1], c[2]); m_drawer->vertex3f(b[0], b[1], b[2]);
+		m_drawer->vertex3f(c[0], c[1], c[2]); m_drawer->vertex3f(h[0], h[1], h[2]);
 
-		glVertex3f(g[0], g[1], g[2]); glVertex3f(b[0], b[1], b[2]);
-		glVertex3f(g[0], g[1], g[2]); glVertex3f(f[0], f[1], f[2]);
-		glVertex3f(g[0], g[1], g[2]); glVertex3f(h[0], h[1], h[2]);
+		m_drawer->vertex3f(g[0], g[1], g[2]); m_drawer->vertex3f(b[0], b[1], b[2]);
+		m_drawer->vertex3f(g[0], g[1], g[2]); m_drawer->vertex3f(f[0], f[1], f[2]);
+		m_drawer->vertex3f(g[0], g[1], g[2]); m_drawer->vertex3f(h[0], h[1], h[2]);
 
-		glVertex3f(e[0], e[1], e[2]); glVertex3f(d[0], d[1], d[2]);
-		glVertex3f(e[0], e[1], e[2]); glVertex3f(f[0], f[1], f[2]);
-		glVertex3f(e[0], e[1], e[2]); glVertex3f(h[0], h[1], h[2]);*/
-
-		glVertex3f(a[0], a[1], a[2]);
-		glVertex3f(b[0], b[1], b[2]);
-		glVertex3f(c[0], c[1], c[2]);
-		glVertex3f(d[0], d[1], d[2]);
-		glVertex3f(e[0], e[1], e[2]);
-		glVertex3f(f[0], f[1], f[2]);
-		glVertex3f(g[0], g[1], g[2]);
-		glVertex3f(h[0], h[1], h[2]);
+		m_drawer->vertex3f(e[0], e[1], e[2]); m_drawer->vertex3f(d[0], d[1], d[2]);
+		m_drawer->vertex3f(e[0], e[1], e[2]); m_drawer->vertex3f(f[0], f[1], f[2]);
+		m_drawer->vertex3f(e[0], e[1], e[2]); m_drawer->vertex3f(h[0], h[1], h[2]);
 	m_drawer->end();
+	m_drawer->endList();
 }
 
 /*FONCTIONS DE DEBOGAGE*/
