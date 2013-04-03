@@ -120,6 +120,7 @@ public:
 	int coarsen(Node* n) ;
 	int refine(Node* n) ;
 
+	void updateRefinement();
 	void updateDrawer();
 
     /*DEBUG FUNCTIONS*/

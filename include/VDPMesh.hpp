@@ -162,8 +162,8 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         
         /*Ajout du nouveau noeud au front courant*/
         n->setActive(true);
-        m_active_nodes.push_front(n);
-        n->setCurrentPosition(m_active_nodes.begin());
+        m_active_nodes.push_back(n);
+        n->setCurrentPosition(--m_active_nodes.end());
         
         n->setHeight(height+1);
         
@@ -300,27 +300,11 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 ||  inactiveMarker.isMarked(dd2))
                     return res;
 
-//                CGoGNout << "  Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-//                CGoGNout << "  Dart phi1(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d)) << CGoGNendl;
-//                CGoGNout << "  Dart d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-//                CGoGNout << "  Dart d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-//				CGoGNout << "  Dart dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-//				CGoGNout << "  Dart dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-//				CGoGNout << "----------------------" << CGoGNendl;
-
                 edgeCollapse(vs);
 
                 m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
 	            m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
                 m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
-
-//                CGoGNout << "  Dart d : " << m_map.template getEmbedding<VERTEX>(d) << CGoGNendl;
-//                CGoGNout << "  Dart phi1(d) : " << m_map.template getEmbedding<VERTEX>(m_map.phi1(d)) << CGoGNendl;
-//                CGoGNout << "  Dart d1 : " << m_map.template getEmbedding<VERTEX>(d1) << CGoGNendl;
-//                CGoGNout << "  Dart d2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-//				CGoGNout << "  Dart dd1 : " << m_map.template getEmbedding<VERTEX>(dd1) << CGoGNendl;
-//				CGoGNout << "  Dart dd2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-//				CGoGNout << "----------------------" << CGoGNendl;
         
                 //Mise a jour des informations de l'arbre
                 m_active_nodes.erase(child_left->getCurrentPosition());
@@ -328,8 +312,8 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 child_left->setActive(false);
                 child_right->setActive(false);
                 parent->setActive(true);
-                m_active_nodes.push_front(parent);
-                parent->setCurrentPosition(m_active_nodes.begin());
+                m_active_nodes.push_back(parent);
+                parent->setCurrentPosition(--m_active_nodes.end());
                 ++res;
             }
         }
@@ -394,7 +378,7 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             ||  inactiveMarker.isMarked(dd1)
             ||  inactiveMarker.isMarked(dd2))
                 return res;
-        
+
 	        unsigned int v1 = m_map.template getEmbedding<VERTEX>(d);				// get the embedding
 	        unsigned int v2 = m_map.template getEmbedding<VERTEX>(dd);			// of the new vertices
 	        unsigned int e1 = m_map.template getEmbedding<EDGE>(m_map.phi1(d));
@@ -419,14 +403,51 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             n->setActive(false);
             child_left->setActive(true);
             child_right->setActive(true);
-            m_active_nodes.push_front(child_left);
-            child_left->setCurrentPosition(m_active_nodes.begin());
-            m_active_nodes.push_front(child_right);
-            child_right->setCurrentPosition(m_active_nodes.begin());
+            m_active_nodes.push_back(child_left);
+            child_left->setCurrentPosition(--m_active_nodes.end());
+            m_active_nodes.push_back(child_right);
+            child_right->setCurrentPosition(--m_active_nodes.end());
             res++;
         }
     }
     return res;
+}
+
+template <typename PFP>
+void VDProgressiveMesh<PFP>::updateRefinement() {
+	std::list<Node*>::iterator it = m_active_nodes.begin();
+	std::list<Node*>::iterator it_back;
+	bool stop = false;
+	int compteur = 0;
+	while(!stop) {
+		it = m_active_nodes.begin();
+		while(it != m_active_nodes.end()) {
+			it_back = it;
+			++it_back;
+			if((*it)->isActive() && m_bb->contains(positionsTable[(*it)->getVertex()])) {
+				//Si le noeud courant est actif et qu'il appartient à la boîte d'intérêt
+				compteur += refine(*it);
+			}
+			else if(	(*it)->getParent()
+					&& 	(*it)->getParent()->isEdgeCollapseLegal()
+					&&	!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])) {
+				//Si le parent du noeud courant est actif , qu'il peut être contracté, et qu'il n'appartient pas à la boîte d'intérêt
+				if(coarsen((*it)->getParent())==1) {
+					if(it != --m_active_nodes.end()) {
+						++it_back;
+					}
+					++compteur;
+				}
+			}
+			it = it_back;
+		}
+		if(compteur == 0) {
+			stop = true;
+		}
+		else {
+			compteur = 0;
+		}
+	}
 }
 
 template <typename PFP>
@@ -444,7 +465,7 @@ void VDProgressiveMesh<PFP>::updateDrawer() {
 	m_drawer->begin(GL_POINTS);
 		m_drawer->lineWidth(7.0f);
 		m_drawer->pointSize(9.0f);
-		m_drawer->color3f(0.0f,0.7f,0.0f);
+		m_drawer->color3f(0.0f, 1.f, 0.0f);
 		/*glVertex3f(a[0], a[1], a[2]); glVertex3f(b[0], b[1], b[2]);
 		glVertex3f(a[0], a[1], a[2]); glVertex3f(d[0], d[1], d[2]);
 		glVertex3f(a[0], a[1], a[2]); glVertex3f(f[0], f[1], f[2]);

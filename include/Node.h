@@ -57,8 +57,11 @@ struct Node {
         std::list<Node*>::iterator getCurrentPosition() { return m_position; }
         void setCurrentPosition(std::list<Node*>::iterator position) { m_position = position; }
 
-        int getHeight() { return m_height;  }
-        void setHeight(int height) { m_height = height;  }
+        int getHeight() { return m_height; }
+        void setHeight(int height) { m_height = height; }
+
+        bool isEdgeCollapseLegal() { return m_parent!=NULL; }
+        bool isVertexSplitLegal() { return (m_child_left != NULL && m_child_right != NULL); }
 
         bool operator==(const Node& n) {
             return  m_parent == n.m_parent

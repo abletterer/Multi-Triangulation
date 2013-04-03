@@ -14,7 +14,7 @@ namespace VDPMesh {
  */
 struct Box {
     public:
-        Box(PFP::VEC3 pos_min = PFP::VEC3(-3., -3., -3.), PFP::VEC3 pos_max = PFP::VEC3(3., 3., 3.))
+        Box(PFP::VEC3 pos_min = PFP::VEC3(-2., -2., -2.), PFP::VEC3 pos_max = PFP::VEC3(2., 2., 2.))
            : m_pos_min(pos_min), m_pos_max(pos_max)
         {} 
         
@@ -23,9 +23,13 @@ struct Box {
 
         PFP::VEC3 getPosMin() { return m_pos_min; }
         void setPosMin(PFP::VEC3 pos_min) { m_pos_min = pos_min; }
+        void incPosMin(unsigned int inc, unsigned int dir) { m_pos_min[dir] += inc; }
+        void decPosMin(unsigned int inc, unsigned int dir) { m_pos_min[dir] -= inc; }
         
         PFP::VEC3 getPosMax() { return m_pos_max; }
         void setPosMax(PFP::VEC3 pos_max) { m_pos_max = pos_max; }
+        void incPosMax(unsigned int inc, unsigned int dir) { m_pos_max[dir] += inc; }
+        void decPosMax(unsigned int inc, unsigned int dir) { m_pos_max[dir] -= inc; }
 
         bool contains(PFP::VEC3 pos) {
         	return 	m_pos_min[0] <= pos[0] && pos[0] <= m_pos_max[0]
