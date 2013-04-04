@@ -196,8 +196,8 @@ void VDPMesh_App::cb_redraw()
 		m_render->draw(m_vectorShader, Algo::Render::GL2::POINTS) ;
 	}
 
-	if(m_pmesh && m_pmesh->getDrawer()) {
-		Utils::Drawer* drawer = m_pmesh->getDrawer();
+	if(m_pmesh && m_pmesh->getInterestBox()->getDrawer()) {
+		Utils::Drawer* drawer = m_pmesh->getInterestBox()->getDrawer();
 		drawer->callList();
 	}
 }
@@ -224,17 +224,16 @@ void VDPMesh_App::cb_Save()
 
 void VDPMesh_App::cb_keyPress(int keycode)
 {
-	m_pmesh->getInterestBox()->print();
     switch(keycode)
     {
     	case 'c' :
     		myMap.check();
     		break;
-    	case 'q' :
+    	case 'd' :
     		m_pmesh->getInterestBox()->incPosMax(0.2, 0);
     		m_pmesh->getInterestBox()->incPosMin(0.2, 0);
     		break;
-    	case 'd' :
+    	case 'q' :
     		m_pmesh->getInterestBox()->decPosMax(0.2, 0);
     		m_pmesh->getInterestBox()->decPosMin(0.2, 0);
     		break;
@@ -246,7 +245,6 @@ void VDPMesh_App::cb_keyPress(int keycode)
     		m_pmesh->getInterestBox()->decPosMax(0.2, 1);
     		m_pmesh->getInterestBox()->decPosMin(0.2, 1);
     		break;
-
     	case 'p' :
     		m_pmesh->getInterestBox()->incPosMax(0.2, 0);
     		m_pmesh->getInterestBox()->incPosMax(0.2, 1);
@@ -266,8 +264,7 @@ void VDPMesh_App::cb_keyPress(int keycode)
     	default:
     		break;
     }
-    m_pmesh->getInterestBox()->print();
-    m_pmesh->updateDrawer();
+    m_pmesh->getInterestBox()->updateDrawer();
     m_pmesh->updateRefinement();
     updateMesh();
 }
@@ -408,7 +405,7 @@ void VDPMesh_App::slot_vertexNumber(int i)
 }
 
 void VDPMesh_App::slot_createPM() {
-    m_pmesh = new VDProgressiveMesh<PFP>(myMap, m_inactiveMarker, position);
+    m_pmesh = new VDProgressiveMesh<PFP>(myMap, m_inactiveMarker, position, bb);
 
     m_pmesh->createPM(dock.lineEdit_pourcent->text().toInt());
 

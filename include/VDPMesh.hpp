@@ -39,7 +39,8 @@ namespace VDPMesh
 template <typename PFP>
 VDProgressiveMesh<PFP>::VDProgressiveMesh(
 		MAP& map, DartMarker& inactive,
-		VertexAttribute<typename PFP::VEC3>& position
+		VertexAttribute<typename PFP::VEC3>& position,
+		Geom::BoundingBox<typename PFP::VEC3> bb
 	) :
 	m_map(map), positionsTable(position), inactiveMarker(inactive), dartSelect(inactiveMarker), m_height(0)
 {
@@ -73,14 +74,11 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
     noeud = m_map.template getAttribute<EmbNode, VERTEX>("noeud") ;
 	if(!noeud.isValid())
 		noeud = m_map.template addAttribute<EmbNode, VERTEX>("noeud") ;
-	
-    CGoGNout << "  initializing interest box.." << CGoGNflush;
-    m_bb = new Box();
-    CGoGNout << "..done" << CGoGNendl;
 
     CGoGNout << "  initializing drawer.." << CGoGNflush;
-    m_drawer = new Utils::Drawer();
-	updateDrawer();
+    m_bb = new Box(bb);
+	m_bb->updateDrawer();
+	updateRefinement();
     CGoGNout << "..done" << CGoGNendl;
 }
 
@@ -93,7 +91,6 @@ VDProgressiveMesh<PFP>::~VDProgressiveMesh()
 	for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
 		delete (*it) ;
 	delete m_bb;
-	delete m_drawer;
 }
 
 template <typename PFP>
@@ -288,7 +285,6 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
             && child_right && child_right->isActive()) {
                 //Si n a un noeud parent et que celui-ci ne fait pas partie du front
                 VSplit<PFP>* vs = parent->getVSplit(); 
-                Dart d = vs->getEdge();
                 Dart d2 = vs->getLeftEdge();
                 Dart dd2 = vs->getRightEdge();
                 Dart d1 = vs->getOppositeLeftEdge();
@@ -429,10 +425,10 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 				compteur += refine(*it);
 			}
 			else if(	(*it)->getParent()
-					&& 	(*it)->getParent()->isEdgeCollapseLegal()
+					&& (*it)->getParent()->isEdgeCollapseLegal()
 					&&	!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])) {
-				//Si le parent du noeud courant est actif , qu'il peut être contracté, et qu'il n'appartient pas à la boîte d'intérêt
-				if(coarsen((*it)->getParent())==1) {
+				//Si le noeud courant est actif et qu'il n'appartient pas à la boîte d'intérêt
+				if(coarsen(*it)==1) {
 					if(it != --m_active_nodes.end()) {
 						++it_back;
 					}
@@ -451,37 +447,16 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 }
 
 template <typename PFP>
-void VDProgressiveMesh<PFP>::updateDrawer() {
-	VEC3 a = m_bb->getPosMin();
-	VEC3 b = VEC3(m_bb->getPosMax()[0], m_bb->getPosMin()[1], m_bb->getPosMin()[2]);
-	VEC3 c = VEC3(m_bb->getPosMax()[0], m_bb->getPosMax()[1], m_bb->getPosMin()[2]);
-	VEC3 d = VEC3(m_bb->getPosMin()[0], m_bb->getPosMax()[1], m_bb->getPosMin()[2]);
-	VEC3 e = VEC3(m_bb->getPosMin()[0], m_bb->getPosMax()[1], m_bb->getPosMax()[2]);
-	VEC3 f = VEC3(m_bb->getPosMin()[0], m_bb->getPosMin()[1], m_bb->getPosMax()[2]);
-	VEC3 g = VEC3(m_bb->getPosMax()[0], m_bb->getPosMin()[1], m_bb->getPosMax()[2]);
-	VEC3 h = m_bb->getPosMax();
+void VDProgressiveMesh<PFP>::forceRefine(Node * n) {
+	std::stack<Node*> stack = std::list<Node*>();
+	stack.push(n);
+	Node* noeud;
+	while((noeud = stack.pop())) {
+		if(noeud->isActive()) {
+			//Si le sommet est actif, il a déjà été raffiné
 
-	m_drawer->newList(GL_COMPILE);
-	m_drawer->begin(GL_LINES);
-		m_drawer->lineWidth(2.0f);
-		m_drawer->color3f(0.0f, 1.f, 0.0f);
-		m_drawer->vertex3f(a[0], a[1], a[2]); m_drawer->vertex3f(b[0], b[1], b[2]);
-		m_drawer->vertex3f(a[0], a[1], a[2]); m_drawer->vertex3f(d[0], d[1], d[2]);
-		m_drawer->vertex3f(a[0], a[1], a[2]); m_drawer->vertex3f(f[0], f[1], f[2]);
-
-		m_drawer->vertex3f(c[0], c[1], c[2]); m_drawer->vertex3f(d[0], d[1], d[2]);
-		m_drawer->vertex3f(c[0], c[1], c[2]); m_drawer->vertex3f(b[0], b[1], b[2]);
-		m_drawer->vertex3f(c[0], c[1], c[2]); m_drawer->vertex3f(h[0], h[1], h[2]);
-
-		m_drawer->vertex3f(g[0], g[1], g[2]); m_drawer->vertex3f(b[0], b[1], b[2]);
-		m_drawer->vertex3f(g[0], g[1], g[2]); m_drawer->vertex3f(f[0], f[1], f[2]);
-		m_drawer->vertex3f(g[0], g[1], g[2]); m_drawer->vertex3f(h[0], h[1], h[2]);
-
-		m_drawer->vertex3f(e[0], e[1], e[2]); m_drawer->vertex3f(d[0], d[1], d[2]);
-		m_drawer->vertex3f(e[0], e[1], e[2]); m_drawer->vertex3f(f[0], f[1], f[2]);
-		m_drawer->vertex3f(e[0], e[1], e[2]); m_drawer->vertex3f(h[0], h[1], h[2]);
-	m_drawer->end();
-	m_drawer->endList();
+		}
+	}
 }
 
 /*FONCTIONS DE DEBOGAGE*/

@@ -86,7 +86,6 @@ private:
 
     //Boite englobante dans laquelle le modèle est plus affiné
     Box* m_bb;
-    Utils::Drawer* m_drawer;
 
     //DEBUG
     int m_height; //Hauteur de l'arbre le plus grand de la forêt
@@ -94,7 +93,8 @@ private:
 public:
 	VDProgressiveMesh(
 		MAP& map, DartMarker& inactive,
-		VertexAttribute<typename PFP::VEC3>& position
+		VertexAttribute<typename PFP::VEC3>& position,
+		Geom::BoundingBox<typename PFP::VEC3> bb
 	) ;
 	~VDProgressiveMesh() ;
 
@@ -109,7 +109,6 @@ public:
 	std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>& approximators() { return m_approximators ; }
 
 	Box* getInterestBox() { return m_bb; }
-	Utils::Drawer* getDrawer() { return m_drawer; }
 
 	void edgeCollapse(VSplit<PFP>* vs) ;
 	void vertexSplit(VSplit<PFP>* vs) ;
@@ -121,7 +120,7 @@ public:
 	int refine(Node* n) ;
 
 	void updateRefinement();
-	void updateDrawer();
+	void forceRefine(Node * n);
 
     /*DEBUG FUNCTIONS*/
     int getForestHeight() { return m_height; }
