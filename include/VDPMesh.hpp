@@ -420,19 +420,24 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 		while(it != m_active_nodes.end()) {
 			it_back = it;
 			++it_back;
-			if((*it)->isActive() && m_bb->contains(positionsTable[(*it)->getVertex()])) {
-				//Si le noeud courant est actif et qu'il appartient à la boîte d'intérêt
-				compteur += refine(*it);
-			}
-			else if(	(*it)->getParent()
-					&& (*it)->getParent()->isEdgeCollapseLegal()
-					&&	!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])) {
-				//Si le noeud courant est actif et qu'il n'appartient pas à la boîte d'intérêt
-				if(coarsen(*it)==1) {
-					if(it != --m_active_nodes.end()) {
-						++it_back;
+			if((*it)->isActive()) {
+				//Si le noeud est actuellement affiché
+				if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
+					//Si le noeud appartient à la boîte d'intérêt
+					compteur += refine(*it);
+				}
+				else {
+					//Si le noeud n'appartient pas à la boîte d'intérêt
+					if(	(*it)->getParent()
+						&& 	!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])) {
+						//Si le noeud a un parent, et que celui-ci n'appartient pas à la boîte d'intérêt
+						if(it_back != m_active_nodes.end()) {
+							++it_back;
+						}
+						if(coarsen(*it)==1) {
+							++compteur;
+						}
 					}
-					++compteur;
 				}
 			}
 			it = it_back;
@@ -446,24 +451,11 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 	}
 }
 
-template <typename PFP>
-void VDProgressiveMesh<PFP>::forceRefine(Node * n) {
-	std::stack<Node*> stack = std::list<Node*>();
-	stack.push(n);
-	Node* noeud;
-	while((noeud = stack.pop())) {
-		if(noeud->isActive()) {
-			//Si le sommet est actif, il a déjà été raffiné
-
-		}
-	}
-}
-
 /*FONCTIONS DE DEBOGAGE*/
 template <typename PFP>
 void VDProgressiveMesh<PFP>::drawForest() {
     for(std::list<Node*>::iterator it = m_active_nodes.begin(); it != m_active_nodes.end(); ++it) {
-        /*On parcourt l'ensemble des racines de la foret*/
+        /*On parcourt l'ensemble des racines de la forêt*/
         drawTree(*it);
         CGoGNout << CGoGNendl;
     } 

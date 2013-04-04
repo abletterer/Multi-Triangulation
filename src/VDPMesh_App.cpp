@@ -42,7 +42,7 @@ VDPMesh_App::VDPMesh_App() :
 	m_drawEdges(false),
 	m_drawFaces(true),
 	m_drawNormals(false),
-	m_drawTopo(false),
+	m_drawTopo(true),
 	m_render(NULL),
 	m_phongShader(NULL),
 	m_flatShader(NULL),
@@ -73,6 +73,7 @@ void VDPMesh_App::initGUI()
     dock.check_drawEdges->setChecked(false) ;
     dock.check_drawFaces->setChecked(true) ;
     dock.check_drawNormals->setChecked(false) ;
+    dock.check_drawTopo->setChecked(true) ;
 
     dock.slider_verticesSize->setVisible(false) ;
     dock.slider_normalsSize->setVisible(false) ;
@@ -224,49 +225,51 @@ void VDPMesh_App::cb_Save()
 
 void VDPMesh_App::cb_keyPress(int keycode)
 {
-    switch(keycode)
-    {
-    	case 'c' :
-    		myMap.check();
-    		break;
-    	case 'd' :
-    		m_pmesh->getInterestBox()->incPosMax(0.2, 0);
-    		m_pmesh->getInterestBox()->incPosMin(0.2, 0);
-    		break;
-    	case 'q' :
-    		m_pmesh->getInterestBox()->decPosMax(0.2, 0);
-    		m_pmesh->getInterestBox()->decPosMin(0.2, 0);
-    		break;
-    	case 'z' :
-    		m_pmesh->getInterestBox()->incPosMax(0.2, 1);
-    		m_pmesh->getInterestBox()->incPosMin(0.2, 1);
-    		break;
-    	case 's' :
-    		m_pmesh->getInterestBox()->decPosMax(0.2, 1);
-    		m_pmesh->getInterestBox()->decPosMin(0.2, 1);
-    		break;
-    	case 'p' :
-    		m_pmesh->getInterestBox()->incPosMax(0.2, 0);
-    		m_pmesh->getInterestBox()->incPosMax(0.2, 1);
-    		m_pmesh->getInterestBox()->incPosMax(0.2, 2);
-    		m_pmesh->getInterestBox()->decPosMin(0.2, 0);
-    		m_pmesh->getInterestBox()->decPosMin(0.2, 1);
-    		m_pmesh->getInterestBox()->decPosMin(0.2, 2);
-    		break;
-    	case 'm' :
-			m_pmesh->getInterestBox()->decPosMax(0.2, 0);
-			m_pmesh->getInterestBox()->decPosMax(0.2, 1);
-			m_pmesh->getInterestBox()->decPosMax(0.2, 2);
-			m_pmesh->getInterestBox()->incPosMin(0.2, 0);
-			m_pmesh->getInterestBox()->incPosMin(0.2, 1);
-			m_pmesh->getInterestBox()->incPosMin(0.2, 2);
-    		break;
-    	default:
-    		break;
-    }
-    m_pmesh->getInterestBox()->updateDrawer();
-    m_pmesh->updateRefinement();
-    updateMesh();
+    if(m_pmesh) {
+		switch(keycode)
+		{
+			case 'c' :
+				myMap.check();
+				break;
+			case 'd' :
+				m_pmesh->getInterestBox()->incPosMax(0.2, 0);
+				m_pmesh->getInterestBox()->incPosMin(0.2, 0);
+				break;
+			case 'q' :
+				m_pmesh->getInterestBox()->decPosMax(0.2, 0);
+				m_pmesh->getInterestBox()->decPosMin(0.2, 0);
+				break;
+			case 'z' :
+				m_pmesh->getInterestBox()->incPosMax(0.2, 1);
+				m_pmesh->getInterestBox()->incPosMin(0.2, 1);
+				break;
+			case 's' :
+				m_pmesh->getInterestBox()->decPosMax(0.2, 1);
+				m_pmesh->getInterestBox()->decPosMin(0.2, 1);
+				break;
+			case 'p' :
+				m_pmesh->getInterestBox()->incPosMax(0.2, 0);
+				m_pmesh->getInterestBox()->incPosMax(0.2, 1);
+				m_pmesh->getInterestBox()->incPosMax(0.2, 2);
+				m_pmesh->getInterestBox()->decPosMin(0.2, 0);
+				m_pmesh->getInterestBox()->decPosMin(0.2, 1);
+				m_pmesh->getInterestBox()->decPosMin(0.2, 2);
+				break;
+			case 'm' :
+				m_pmesh->getInterestBox()->decPosMax(0.2, 0);
+				m_pmesh->getInterestBox()->decPosMax(0.2, 1);
+				m_pmesh->getInterestBox()->decPosMax(0.2, 2);
+				m_pmesh->getInterestBox()->incPosMin(0.2, 0);
+				m_pmesh->getInterestBox()->incPosMin(0.2, 1);
+				m_pmesh->getInterestBox()->incPosMin(0.2, 2);
+				break;
+			default:
+				break;
+		}
+		m_pmesh->getInterestBox()->updateDrawer();
+		m_pmesh->updateRefinement();
+		updateMesh();
+	}
 }
 
 void VDPMesh_App::importMesh(std::string& filename)

@@ -16,7 +16,9 @@ struct Box {
     public:
         Box(PFP::VEC3 pos_min = PFP::VEC3(-2., -2., -2.), PFP::VEC3 pos_max = PFP::VEC3(2., 2., 2.))
         	: m_pos_min(pos_min), m_pos_max(pos_max)
-        {} 
+        {
+        	m_drawer = new Utils::Drawer();
+        }
         
         Box(Geom::BoundingBox<PFP::VEC3> bb)
         	: m_pos_min(bb.min()), m_pos_max(bb.max())
