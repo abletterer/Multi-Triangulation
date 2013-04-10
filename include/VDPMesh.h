@@ -120,6 +120,10 @@ public:
 	int refine(Node* n) ;
 
 	void updateRefinement();
+	void forceRefine(Node* n);
+
+	bool isEdgeCollapseLegal(Node* n);
+	bool isVertexSplitLegal(Node* n);
 
     /*DEBUG FUNCTIONS*/
     int getForestHeight() { return m_height; }

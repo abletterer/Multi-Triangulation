@@ -50,7 +50,8 @@ VDPMesh_App::VDPMesh_App() :
 	m_simpleColorShader(NULL),
 	m_pointSprite(NULL),
     m_inactiveMarker(myMap),
-    m_pmesh(NULL)
+    m_pmesh(NULL),
+    m_strings(NULL)
 {
 	normalScaleFactor = 1.0f ;
 	vertexScaleFactor = 0.1f ;
@@ -141,11 +142,17 @@ void VDPMesh_App::cb_initGL()
 	m_pointSprite = new Utils::PointSprite() ;
 	m_pointSprite->setAttributePosition(m_positionVBO) ;
 
+    m_strings = new Utils::Strings3D(true, Geom::Vec3f(0.1f,0.0f,0.3f));
+    m_strings->setScale(0.5f);
+    storeVerticesInfo();
+    m_strings->sendToVBO();
+
 	registerShader(m_phongShader) ;
 	registerShader(m_flatShader) ;
 	registerShader(m_vectorShader) ;
 	registerShader(m_simpleColorShader) ;
 	registerShader(m_pointSprite) ;
+	registerShader(m_strings);
 }
 
 void VDPMesh_App::cb_redraw()
@@ -197,6 +204,8 @@ void VDPMesh_App::cb_redraw()
 		m_render->draw(m_vectorShader, Algo::Render::GL2::POINTS) ;
 	}
 
+	m_strings->drawAll(Geom::Vec3f(0.0f, 1.0f, 1.0f));
+
 	if(m_pmesh && m_pmesh->getInterestBox()->getDrawer()) {
 		Utils::Drawer* drawer = m_pmesh->getInterestBox()->getDrawer();
 		drawer->callList();
@@ -221,6 +230,21 @@ void VDPMesh_App::cb_Save()
 
 	if (!filename.empty())
 		exportMesh(filename) ;
+}
+
+void VDPMesh_App::storeVerticesInfo()
+{
+	CellMarker<VERTEX> mv(myMap);
+	for (Dart d = myMap.begin(); d != myMap.end(); myMap.next(d))
+	{
+		if (!mv.isMarked(d))
+		{
+			mv.mark(d);
+			std::stringstream ss;
+			ss << d << " : "<< position[d];
+			m_strings->addString(ss.str(), position[d]);
+		}
+	}
 }
 
 void VDPMesh_App::cb_keyPress(int keycode)

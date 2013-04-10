@@ -354,7 +354,7 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 {
     int res = 0;
     if(n && n->isActive()) {
-        //Si n fait partie du front et qu'il est contenu dans la boîte d'intérê
+        //Si n fait partie du front
         Node* child_left = n->getLeftChild();
         Node* child_right = n->getRightChild();
         if( child_left && !child_left->isActive() 
@@ -415,32 +415,63 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 	std::list<Node*>::iterator it_back;
 	bool stop = false;
 	int compteur = 0;
+	bool transformation = false;
 	while(!stop) {
 		it = m_active_nodes.begin();
 		while(it != m_active_nodes.end()) {
-			it_back = it;
-			++it_back;
-			if((*it)->isActive()) {
+			transformation = false;
+			if(it != m_active_nodes.begin()) {
+				it_back = it;	//On retient l'élément prédécesseur
+				--it_back;
+			}
+			else {
+				//Si l'élément en cours de traitement est le premier de la liste
+				it_back = m_active_nodes.end();
+			}
+
+			if((*it) && (*it)->isActive()) {
 				//Si le noeud est actuellement affiché
 				if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
 					//Si le noeud appartient à la boîte d'intérêt
-					compteur += refine(*it);
+					if(refine(*it)==1) {
+						//Si l'opération a été effectuée = des éléments ont été supprimés
+						transformation = true;
+						++compteur;
+					}
 				}
 				else {
 					//Si le noeud n'appartient pas à la boîte d'intérêt
-					if(	(*it)->getParent()
-						&& 	!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])) {
-						//Si le noeud a un parent, et que celui-ci n'appartient pas à la boîte d'intérêt
-						if(it_back != m_active_nodes.end()) {
-							++it_back;
-						}
-						if(coarsen(*it)==1) {
-							++compteur;
+					if((*it)->getParent()) {
+						Node* child_left = (*it)->getParent()->getLeftChild();
+						Node* child_right = (*it)->getParent()->getRightChild();
+						if(		!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])
+							&&	!m_bb->contains(positionsTable[child_left->getVertex()])
+							&& 	!m_bb->contains(positionsTable[child_right->getVertex()])) {
+							//Si le noeud a un parent qui n'appartient pas à la boîte d'intérêt
+							if(coarsen(*it) ==1) {
+								//Si l'opération a été effectuée = des éléments ont été supprimés
+								transformation = true;
+								++compteur;
+							}
 						}
 					}
 				}
 			}
-			it = it_back;
+
+			if(transformation) {
+				//Si une transformation a eu lieu = des élément ont été supprimés
+				if(it_back != m_active_nodes.end()) {
+					it = ++it_back;
+				}
+				else {
+					it = m_active_nodes.begin();
+				}
+			}
+			else {
+				//Si aucune transformation n'a eu lieu
+				std::advance(it_back, 2);	//On saute l'élément suivant, qui vient d'être traité à l'instant
+				it = it_back;
+			}
 		}
 		if(compteur == 0) {
 			stop = true;
@@ -449,6 +480,52 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 			compteur = 0;
 		}
 	}
+}
+
+template <typename PFP>
+bool VDProgressiveMesh<PFP>::isEdgeCollapseLegal(Node* n) {
+	bool res = false;
+	if(n->getParent()) {
+		Node* child_left = n->getParent()->getLeftChild();
+		Node* child_right = n->getParent()->getRightChild();
+		if(child_left && child_right && child_left->isActive() && child_right->isActive()) {
+			VSplit<PFP>* vs = n->getVSplit();
+			if(vs) {
+				Dart dd2 = vs->getRightEdge();
+				Dart d2 = vs->getLeftEdge();
+				Dart d1 = vs->getOppositeLeftEdge();
+				Dart dd1 = vs->getOppositeRightEdge();
+
+				if( !inactiveMarker.isMarked(d1)
+				&&  !inactiveMarker.isMarked(d2)
+				&&  !inactiveMarker.isMarked(dd1)
+				&&  !inactiveMarker.isMarked(dd2))
+					res = true;
+			}
+		}
+	}
+	return res;
+}
+
+template <typename PFP>
+bool VDProgressiveMesh<PFP>::isVertexSplitLegal(Node* n) {
+	bool res = false;
+	if(n->isActive()) {
+		VSplit<PFP>* vs = n->getVSplit();
+		if(vs) {
+			Dart dd2 = vs->getRightEdge();
+			Dart d2 = vs->getLeftEdge();
+			Dart d1 = vs->getOppositeLeftEdge();
+			Dart dd1 = vs->getOppositeRightEdge();
+
+			if( !inactiveMarker.isMarked(d1)
+			&&  !inactiveMarker.isMarked(d2)
+			&&  !inactiveMarker.isMarked(dd1)
+			&&  !inactiveMarker.isMarked(dd2))
+				res = true;
+		}
+	}
+	return res;
 }
 
 /*FONCTIONS DE DEBOGAGE*/

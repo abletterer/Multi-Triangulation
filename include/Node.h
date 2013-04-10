@@ -61,7 +61,6 @@ struct Node {
         void setHeight(int height) { m_height = height; }
 
         bool isEdgeCollapseLegal() { return m_parent!=NULL; }
-        bool isVertexSplitLegal() { return (m_child_left != NULL && m_child_right != NULL); }
 
         bool operator==(const Node& n) {
             return  m_parent == n.m_parent

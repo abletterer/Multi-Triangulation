@@ -116,6 +116,7 @@ public:
 	Utils::ShaderVectorPerVertex* m_vectorShader ;
 	Utils::ShaderSimpleColor* m_simpleColorShader ;
 	Utils::PointSprite* m_pointSprite ;
+	Utils::Strings3D* m_strings;
     
     DartMarker m_inactiveMarker;
     SelectorUnmarked* m_selectorMarked;
@@ -130,6 +131,8 @@ public:
 	void cb_redraw() ;
 	void cb_Open() ;
 	void cb_Save() ;
+
+	void storeVerticesInfo();
 
 	void cb_keyPress(int keycode);
 
