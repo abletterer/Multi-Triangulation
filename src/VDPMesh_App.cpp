@@ -143,9 +143,9 @@ void VDPMesh_App::cb_initGL()
 	m_pointSprite->setAttributePosition(m_positionVBO) ;
 
     m_strings = new Utils::Strings3D(true, Geom::Vec3f(0.1f,0.0f,0.3f));
-    m_strings->setScale(0.5f);
     storeVerticesInfo();
     m_strings->sendToVBO();
+    m_strings->setScale(0.5f);
 
 	registerShader(m_phongShader) ;
 	registerShader(m_flatShader) ;

@@ -83,7 +83,7 @@ struct Box {
         }
 
         void print() {
-        	CGoGNout << "Boite d'intéret : " << CGoGNendl;
+        	CGoGNout << "Boîte d'intéret : " << CGoGNendl;
         	CGoGNout << "  Min : X = " << m_pos_min[0] << " | Y = " << m_pos_min[1] << " | Z = " << m_pos_min[2] << CGoGNendl;
         	CGoGNout << "  Max : X = " << m_pos_max[0] << " | Y = " << m_pos_max[1] << " | Z = " << m_pos_max[2] << CGoGNendl;
         }
