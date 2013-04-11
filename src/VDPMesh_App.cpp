@@ -143,8 +143,6 @@ void VDPMesh_App::cb_initGL()
 	m_pointSprite->setAttributePosition(m_positionVBO) ;
 
     m_strings = new Utils::Strings3D(true, Geom::Vec3f(0.1f,0.0f,0.3f));
-    storeVerticesInfo();
-    m_strings->sendToVBO();
     m_strings->setScale(0.5f);
 
 	registerShader(m_phongShader) ;
@@ -234,6 +232,7 @@ void VDPMesh_App::cb_Save()
 
 void VDPMesh_App::storeVerticesInfo()
 {
+	m_strings->clear();
 	CellMarker<VERTEX> mv(myMap);
 	for (Dart d = myMap.begin(); d != myMap.end(); myMap.next(d))
 	{
@@ -241,7 +240,7 @@ void VDPMesh_App::storeVerticesInfo()
 		{
 			mv.mark(d);
 			std::stringstream ss;
-			ss << d << " : "<< position[d];
+			ss << d ;
 			m_strings->addString(ss.str(), position[d]);
 		}
 	}
@@ -368,6 +367,9 @@ void VDPMesh_App::updateMesh() {
 	
     m_positionVBO->updateData(position) ;
 	m_normalVBO->updateData(normal) ;
+
+	storeVerticesInfo();
+	m_strings->sendToVBO();
     
     updateGL();
 }

@@ -430,7 +430,7 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 			}
 
 			if((*it) && (*it)->isActive()) {
-				//Si le noeud est actuellement affiché
+				//Si le noeud est actuellement affichéq
 				if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
 					//Si le noeud appartient à la boîte d'intérêt
 					if(refine(*it)==1) {
