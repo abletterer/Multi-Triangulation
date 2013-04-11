@@ -124,10 +124,10 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 			break ;
 
 		--nbVertices ;
-		Dart d2 = m_map.phi2(m_map.phi_1(d)) ;
-		Dart dd2 = m_map.phi2(m_map.phi_1(m_map.phi2(d))) ;
 		Dart d1 = m_map.phi2(m_map.phi1(d)) ;
+		Dart d2 = m_map.phi2(m_map.phi_1(d)) ;
 	    Dart dd1 = m_map.phi2(m_map.phi1(m_map.phi2(d))) ;
+		Dart dd2 = m_map.phi2(m_map.phi_1(m_map.phi2(d))) ;
 
 		VSplit<PFP>* vs = new VSplit<PFP>(m_map, d, dd2, d2, dd1, d1) ;	// create new VSplit node 
         
@@ -302,6 +302,13 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 	            m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
                 m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
         
+                if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
+                	CGoGNout << "Pas bon pas bon coarsen" << CGoGNendl;
+                	CGoGNout << "  D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+                	CGoGNout << "  DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+                	return res;
+                }
+
                 //Mise a jour des informations de l'arbre
                 m_active_nodes.erase(child_left->getCurrentPosition());
                 m_active_nodes.erase(child_right->getCurrentPosition());
@@ -372,8 +379,16 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             if( inactiveMarker.isMarked(d1)
             ||  inactiveMarker.isMarked(d2)
             ||  inactiveMarker.isMarked(dd1)
-            ||  inactiveMarker.isMarked(dd2))
+            ||  inactiveMarker.isMarked(dd2)) {
                 return res;
+            }
+
+            if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
+            	CGoGNout << "Pas bon pas bon refine" << CGoGNendl;
+            	CGoGNout << "  D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+            	CGoGNout << "  DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+            	return res;
+            }
 
 	        unsigned int v1 = m_map.template getEmbedding<VERTEX>(d);				// get the embedding
 	        unsigned int v2 = m_map.template getEmbedding<VERTEX>(dd);			// of the new vertices
