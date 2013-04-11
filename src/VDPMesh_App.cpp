@@ -202,7 +202,7 @@ void VDPMesh_App::cb_redraw()
 		m_render->draw(m_vectorShader, Algo::Render::GL2::POINTS) ;
 	}
 
-	//m_strings->drawAll(Geom::Vec3f(0.0f, 1.0f, 1.0f));
+	m_strings->drawAll(Geom::Vec3f(0.0f, 1.0f, 1.0f));
 
 	if(m_pmesh && m_pmesh->getInterestBox()->getDrawer()) {
 		Utils::Drawer* drawer = m_pmesh->getInterestBox()->getDrawer();

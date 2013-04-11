@@ -376,6 +376,7 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        Dart d1 = vs->getOppositeLeftEdge();
 	        Dart dd1 = vs->getOppositeRightEdge();
 
+	        //Vérification de la présence des brins entourant la paire de triangles
             if( inactiveMarker.isMarked(d1)
             ||  inactiveMarker.isMarked(d2)
             ||  inactiveMarker.isMarked(dd1)
@@ -383,6 +384,7 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
                 return res;
             }
 
+            //Vérification
             if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
             	CGoGNout << "Pas bon pas bon refine" << CGoGNendl;
             	CGoGNout << "  D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
