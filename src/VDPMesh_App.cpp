@@ -202,7 +202,7 @@ void VDPMesh_App::cb_redraw()
 		m_render->draw(m_vectorShader, Algo::Render::GL2::POINTS) ;
 	}
 
-	m_strings->drawAll(Geom::Vec3f(0.0f, 1.0f, 1.0f));
+	//m_strings->drawAll(Geom::Vec3f(0.0f, 1.0f, 1.0f));
 
 	if(m_pmesh && m_pmesh->getInterestBox()->getDrawer()) {
 		Utils::Drawer* drawer = m_pmesh->getInterestBox()->getDrawer();
@@ -255,36 +255,36 @@ void VDPMesh_App::cb_keyPress(int keycode)
 				myMap.check();
 				break;
 			case 'd' :
-				m_pmesh->getInterestBox()->incPosMax(0.2, 0);
-				m_pmesh->getInterestBox()->incPosMin(0.2, 0);
+				m_pmesh->getInterestBox()->incPosMax((float)(bb.diag()[0]/10.), 0);
+				m_pmesh->getInterestBox()->incPosMin((float)(bb.diag()[0]/10.), 0);
 				break;
 			case 'q' :
-				m_pmesh->getInterestBox()->decPosMax(0.2, 0);
-				m_pmesh->getInterestBox()->decPosMin(0.2, 0);
+				m_pmesh->getInterestBox()->decPosMax((float)(bb.diag()[0]/10.), 0);
+				m_pmesh->getInterestBox()->decPosMin((float)(bb.diag()[0]/10.), 0);
 				break;
 			case 'z' :
-				m_pmesh->getInterestBox()->incPosMax(0.2, 1);
-				m_pmesh->getInterestBox()->incPosMin(0.2, 1);
+				m_pmesh->getInterestBox()->incPosMax((float)(bb.diag()[1]/10.), 1);
+				m_pmesh->getInterestBox()->incPosMin((float)(bb.diag()[1]/10.), 1);
 				break;
 			case 's' :
-				m_pmesh->getInterestBox()->decPosMax(0.2, 1);
-				m_pmesh->getInterestBox()->decPosMin(0.2, 1);
+				m_pmesh->getInterestBox()->decPosMax((float)(bb.diag()[1]/10.), 1);
+				m_pmesh->getInterestBox()->decPosMin((float)(bb.diag()[1]/10.), 1);
 				break;
 			case 'p' :
-				m_pmesh->getInterestBox()->incPosMax(0.2, 0);
-				m_pmesh->getInterestBox()->incPosMax(0.2, 1);
-				m_pmesh->getInterestBox()->incPosMax(0.2, 2);
-				m_pmesh->getInterestBox()->decPosMin(0.2, 0);
-				m_pmesh->getInterestBox()->decPosMin(0.2, 1);
-				m_pmesh->getInterestBox()->decPosMin(0.2, 2);
+				m_pmesh->getInterestBox()->incPosMax((float)(bb.diag()[0]/10.), 0);
+				m_pmesh->getInterestBox()->incPosMax((float)(bb.diag()[1]/10.), 1);
+				m_pmesh->getInterestBox()->incPosMax((float)(bb.diag()[2]/10.), 2);
+				m_pmesh->getInterestBox()->decPosMin((float)(bb.diag()[0]/10.), 0);
+				m_pmesh->getInterestBox()->decPosMin((float)(bb.diag()[1]/10.), 1);
+				m_pmesh->getInterestBox()->decPosMin((float)(bb.diag()[2]/10.), 2);
 				break;
 			case 'm' :
-				m_pmesh->getInterestBox()->decPosMax(0.2, 0);
-				m_pmesh->getInterestBox()->decPosMax(0.2, 1);
-				m_pmesh->getInterestBox()->decPosMax(0.2, 2);
-				m_pmesh->getInterestBox()->incPosMin(0.2, 0);
-				m_pmesh->getInterestBox()->incPosMin(0.2, 1);
-				m_pmesh->getInterestBox()->incPosMin(0.2, 2);
+				m_pmesh->getInterestBox()->decPosMax((float)(bb.diag()[0]/10.), 0);
+				m_pmesh->getInterestBox()->decPosMax((float)(bb.diag()[1]/10.), 1);
+				m_pmesh->getInterestBox()->decPosMax((float)(bb.diag()[2]/10.), 2);
+				m_pmesh->getInterestBox()->incPosMin((float)(bb.diag()[0]/10.), 0);
+				m_pmesh->getInterestBox()->incPosMin((float)(bb.diag()[1]/10.), 1);
+				m_pmesh->getInterestBox()->incPosMin((float)(bb.diag()[2]/10.), 2);
 				break;
 			default:
 				break;

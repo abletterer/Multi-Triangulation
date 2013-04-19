@@ -376,6 +376,11 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        Dart d1 = vs->getOppositeLeftEdge();
 	        Dart dd1 = vs->getOppositeRightEdge();
 
+	        if(m_map.phi2(d1)!=d2 || m_map.phi2(dd1)!=dd2) {
+	        	CGoGNout << "Mais c'est pas les mêmes" << CGoGNendl;
+	        	return res;
+	        }
+
 	        //Vérification de la présence des brins entourant la paire de triangles
             if( inactiveMarker.isMarked(d1)
             ||  inactiveMarker.isMarked(d2)
