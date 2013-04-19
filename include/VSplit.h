@@ -55,8 +55,8 @@ private:
 	unsigned int approxEdgeId1, approxEdgeId2 ;
 
 public:
-	VSplit(MAP& m, Dart e, Dart r, Dart l, Dart ro, Dart ol)
-		: map(m), edge(e), right_edge(r), left_edge(l), opposite_right_edge(ro), opposite_left_edge(ol), approxVertexId(EMBNULL), approxEdgeId1(EMBNULL), approxEdgeId2(EMBNULL)
+	VSplit(MAP& m, Dart e, Dart r, Dart l, Dart ro, Dart lo)
+		: map(m), edge(e), right_edge(r), left_edge(l), opposite_right_edge(ro), opposite_left_edge(lo), approxVertexId(EMBNULL), approxEdgeId1(EMBNULL), approxEdgeId2(EMBNULL)
 	{}
 	~VSplit()
 	{

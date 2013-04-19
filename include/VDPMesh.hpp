@@ -48,11 +48,13 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
 	std::vector<VertexAttribute< typename PFP::VEC3>* > pos_v ;
 	pos_v.push_back(&positionsTable) ;
 	m_approximators.push_back(new Algo::Surface::Decimation::Approximator_MidEdge<PFP>(m_map, pos_v)) ;
+	//m_approximators.push_back(new Algo::Surface::Decimation::Approximator_QEM<PFP>(m_map, pos_v));
 	CGoGNout << "..done" << CGoGNendl ;
 
 
 	CGoGNout << "  creating selector.." << CGoGNflush ;			
-    m_selector = new Algo::Surface::Decimation::EdgeSelector_Length<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;	
+    m_selector = new Algo::Surface::Decimation::EdgeSelector_Length<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
+	//m_selector = new Algo::Surface::Decimation::EdgeSelector_QEM<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
     CGoGNout << "..done" << CGoGNendl ;
 
 	m_initOk = true ;
@@ -371,15 +373,15 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 
 	        Dart d = vs->getEdge();
 	        Dart dd = m_map.phi2(d);
-	        Dart dd2 = vs->getRightEdge();
 	        Dart d2 = vs->getLeftEdge();
-	        Dart d1 = vs->getOppositeLeftEdge();
-	        Dart dd1 = vs->getOppositeRightEdge();
+	        Dart dd2 = vs->getRightEdge();
+	        Dart d1 = m_map.phi2(d2) ;	//On prend les côtés opposés
+			Dart dd1 = m_map.phi2(dd2) ;
 
-	        if(m_map.phi2(d1)!=d2 || m_map.phi2(dd1)!=dd2) {
-	        	CGoGNout << "Mais c'est pas les mêmes" << CGoGNendl;
-	        	return res;
-	        }
+//	        if(m_map.phi2(d1)!=d2 && m_map.phi2(dd1)!=dd2) {
+//	        	CGoGNout << "Mais c'est pas les mêmes" << CGoGNendl;
+//	        	return res;
+//	        }
 
 	        //Vérification de la présence des brins entourant la paire de triangles
             if( inactiveMarker.isMarked(d1)
@@ -389,7 +391,7 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
                 return res;
             }
 
-            //Vérification
+            //Vérification de la bonne configuration des faces adjacentes
             if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
             	CGoGNout << "Pas bon pas bon refine" << CGoGNendl;
             	CGoGNout << "  D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
