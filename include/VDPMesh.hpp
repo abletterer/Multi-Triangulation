@@ -55,18 +55,16 @@ VDProgressiveMesh<PFP>::VDProgressiveMesh(
 	CGoGNout << "  creating selector.." << CGoGNflush ;			
     m_selector = new Algo::Surface::Decimation::EdgeSelector_Length<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
 	//m_selector = new Algo::Surface::Decimation::EdgeSelector_QEM<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
-    CGoGNout << "..done" << CGoGNendl ;
+	//m_selector = new Algo::Surface::Decimation::EdgeSelector_MapOrder<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
+	//m_selector = new Algo::Surface::Decimation::EdgeSelector_Random<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
+	//m_selector = new Algo::Surface::Decimation::EdgeSelector_MinDetail<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
+	//m_selector = new Algo::Surface::Decimation::EdgeSelector_Curvature<PFP>(m_map, positionsTable, m_approximators, dartSelect) ;
+	CGoGNout << "..done" << CGoGNendl ;
 
 	m_initOk = true ;
 
 	CGoGNout << "  initializing approximators.." << CGoGNflush ;
 	for(typename std::vector<Algo::Surface::Decimation::ApproximatorGen<PFP>*>::iterator it = m_approximators.begin(); it != m_approximators.end(); ++it)
-	{
-		if(! (*it)->init())
-			m_initOk = false ;
-		if((*it)->getApproximatedAttributeName() == "position")
-			m_positionApproximator = reinterpret_cast<Algo::Surface::Decimation::Approximator<PFP, VEC3, EDGE>*>(*it) ;
-	}
 	CGoGNout << "..done" << CGoGNendl ;
 
 	CGoGNout << "  initializing selector.." << CGoGNflush ;
@@ -303,13 +301,6 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
                 m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
 	            m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
                 m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
-        
-                if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
-                	CGoGNout << "Pas bon pas bon coarsen" << CGoGNendl;
-                	CGoGNout << "  D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-                	CGoGNout << "  DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
-                	return res;
-                }
 
                 //Mise a jour des informations de l'arbre
                 m_active_nodes.erase(child_left->getCurrentPosition());
@@ -378,11 +369,6 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        Dart d1 = m_map.phi2(d2) ;	//On prend les côtés opposés
 			Dart dd1 = m_map.phi2(dd2) ;
 
-//	        if(m_map.phi2(d1)!=d2 && m_map.phi2(dd1)!=dd2) {
-//	        	CGoGNout << "Mais c'est pas les mêmes" << CGoGNendl;
-//	        	return res;
-//	        }
-
 	        //Vérification de la présence des brins entourant la paire de triangles
             if( inactiveMarker.isMarked(d1)
             ||  inactiveMarker.isMarked(d2)
@@ -393,9 +379,6 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 
             //Vérification de la bonne configuration des faces adjacentes
             if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
-            	CGoGNout << "Pas bon pas bon refine" << CGoGNendl;
-            	CGoGNout << "  D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-            	CGoGNout << "  DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
             	return res;
             }
 
@@ -445,7 +428,8 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 		while(it != m_active_nodes.end()) {
 			transformation = false;
 			if(it != m_active_nodes.begin()) {
-				it_back = it;	//On retient l'élément prédécesseur
+				//On retient le prédécesseur
+				it_back = it;
 				--it_back;
 			}
 			else {
@@ -458,7 +442,7 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 				if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
 					//Si le noeud appartient à la boîte d'intérêt
 					if(refine(*it)==1) {
-						//Si l'opération a été effectuée = des éléments ont été supprimés
+						//Si l'opération a été effectuée => des éléments ont été supprimés
 						transformation = true;
 						++compteur;
 					}
@@ -472,8 +456,8 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 							&&	!m_bb->contains(positionsTable[child_left->getVertex()])
 							&& 	!m_bb->contains(positionsTable[child_right->getVertex()])) {
 							//Si le noeud a un parent qui n'appartient pas à la boîte d'intérêt
-							if(coarsen(*it) ==1) {
-								//Si l'opération a été effectuée = des éléments ont été supprimés
+							if(coarsen(*it)==1) {
+								//Si l'opération a été effectuée => des éléments ont été supprimés
 								transformation = true;
 								++compteur;
 							}
