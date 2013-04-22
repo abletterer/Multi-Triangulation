@@ -55,7 +55,7 @@ struct Box {
 
         	m_drawer->newList(GL_COMPILE);
         	m_drawer->begin(GL_LINES);
-        		m_drawer->lineWidth(2.0f);
+        		m_drawer->lineWidth(1.0f);
         		m_drawer->color3f(0.0f, 1.f, 0.0f);
         		m_drawer->vertex3f(a[0], a[1], a[2]); m_drawer->vertex3f(b[0], b[1], b[2]);
         		m_drawer->vertex3f(a[0], a[1], a[2]); m_drawer->vertex3f(d[0], d[1], d[2]);

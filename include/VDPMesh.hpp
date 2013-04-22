@@ -367,7 +367,9 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
 	        Dart d2 = vs->getLeftEdge();
 	        Dart dd2 = vs->getRightEdge();
 	        Dart d1 = m_map.phi2(d2) ;	//On prend les côtés opposés
+	        vs->setOppositeLeftEdge(d1);
 			Dart dd1 = m_map.phi2(dd2) ;
+			vs->setOppositeRightEdge(dd1);
 
 	        //Vérification de la présence des brins entourant la paire de triangles
             if( inactiveMarker.isMarked(d1)
@@ -406,10 +408,10 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             n->setActive(false);
             child_left->setActive(true);
             child_right->setActive(true);
-            m_active_nodes.push_back(child_left);
-            child_left->setCurrentPosition(--m_active_nodes.end());
-            m_active_nodes.push_back(child_right);
-            child_right->setCurrentPosition(--m_active_nodes.end());
+            m_active_nodes.push_front(child_left);
+            child_left->setCurrentPosition(m_active_nodes.begin());
+            m_active_nodes.push_front(child_right);
+            child_right->setCurrentPosition(m_active_nodes.begin());
             res++;
         }
     }
@@ -438,7 +440,7 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 			}
 
 			if((*it) && (*it)->isActive()) {
-				//Si le noeud est actuellement affichéq
+				//Si le noeud est actuellement affiché
 				if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
 					//Si le noeud appartient à la boîte d'intérêt
 					if(refine(*it)==1) {
@@ -450,8 +452,8 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 				else {
 					//Si le noeud n'appartient pas à la boîte d'intérêt
 					if((*it)->getParent()) {
-						Node* child_left = (*it)->getParent()->getLeftChild();
-						Node* child_right = (*it)->getParent()->getRightChild();
+						Node* child_left = (*it)->getParent()->getLeftChild();	//Possibilité d'être le noeud courant
+						Node* child_right = (*it)->getParent()->getRightChild();	//Possibilité d'être le noeud courant
 						if(		!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])
 							&&	!m_bb->contains(positionsTable[child_left->getVertex()])
 							&& 	!m_bb->contains(positionsTable[child_right->getVertex()])) {
@@ -481,6 +483,7 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 				it = it_back;
 			}
 		}
+		CGoGNout << "Compteur : " << compteur << CGoGNendl;
 		if(compteur == 0) {
 			stop = true;
 		}

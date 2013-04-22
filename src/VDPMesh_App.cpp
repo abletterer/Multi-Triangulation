@@ -155,6 +155,7 @@ void VDPMesh_App::cb_initGL()
 
 void VDPMesh_App::cb_redraw()
 {
+	glClearColor(1.f,1.f,1.f,1.f);
 	if(m_drawVertices)
 	{
 		float size = vertexScaleFactor ;

@@ -45,36 +45,41 @@ public:
 	typedef typename PFP::VEC3 VEC3 ;
 
 private:
-	MAP& map ;
-	Dart edge ;
-	Dart right_edge ;
-	Dart left_edge ;
-    Dart opposite_right_edge;
-    Dart opposite_left_edge;
+	MAP& m_map ;
+	Dart m_edge ;
+	Dart m_right_edge ;
+	Dart m_left_edge ;
+    Dart m_opposite_right_edge;
+    Dart m_opposite_left_edge;
 	unsigned int approxVertexId ;
 	unsigned int approxEdgeId1, approxEdgeId2 ;
 
 public:
 	VSplit(MAP& m, Dart e, Dart r, Dart l, Dart ro, Dart lo)
-		: map(m), edge(e), right_edge(r), left_edge(l), opposite_right_edge(ro), opposite_left_edge(lo), approxVertexId(EMBNULL), approxEdgeId1(EMBNULL), approxEdgeId2(EMBNULL)
+		: m_map(m), m_edge(e), m_right_edge(r), m_left_edge(l), m_opposite_right_edge(ro), m_opposite_left_edge(lo), approxVertexId(EMBNULL), approxEdgeId1(EMBNULL), approxEdgeId2(EMBNULL)
 	{}
 	~VSplit()
 	{
-		AttributeContainer& cont = map.template getAttributeContainer<VERTEX>() ;
+		AttributeContainer& cont = m_map.template getAttributeContainer<VERTEX>() ;
 		if(approxVertexId != EMBNULL) cont.unrefLine(approxVertexId) ;
 	}
 
-	Dart getEdge() { return edge ; }
-	Dart getLeftEdge() { return left_edge ; }
-	Dart getRightEdge() { return right_edge ; }
-	Dart getOppositeRightEdge() { return opposite_right_edge ; }
-	Dart getOppositeLeftEdge() { return opposite_left_edge ; }
+	Dart getEdge() { return m_edge ; }
+	Dart getLeftEdge() { return m_left_edge ; }
+	Dart getRightEdge() { return m_right_edge ; }
+	Dart getOppositeRightEdge() { return m_opposite_right_edge ; }
+	Dart getOppositeLeftEdge() { return m_opposite_left_edge ; }
+	void setEdge(Dart edge) { m_edge = edge ; }
+	void setLeftEdge(Dart edge) { m_left_edge = edge ; }
+	void setRightEdge(Dart edge) { m_right_edge = edge ; }
+	void setOppositeRightEdge(Dart edge) { m_opposite_right_edge = edge ; }
+	void setOppositeLeftEdge(Dart edge) { m_opposite_left_edge = edge ; }
 
 	unsigned int getApproxV() { return approxVertexId ; }
 	void setApproxV(unsigned int id)
 	{
 		if(approxVertexId == id) return ;
-		AttributeContainer& cont = map.template getAttributeContainer<VERTEX>() ;
+		AttributeContainer& cont = m_map.template getAttributeContainer<VERTEX>() ;
 		if(approxVertexId != EMBNULL)
 			cont.unrefLine(approxVertexId) ;
 		if(id != EMBNULL) cont.refLine(id) ;
@@ -85,7 +90,7 @@ public:
 	void setApproxE1(unsigned int id)
 	{
 		if(approxEdgeId1 == id) return ;
-		AttributeContainer& cont = map.template getAttributeContainer<EDGE>() ;
+		AttributeContainer& cont = m_map.template getAttributeContainer<EDGE>() ;
 		if(approxEdgeId1 != EMBNULL)
 			cont.unrefLine(approxEdgeId1) ;
 		if(id != EMBNULL) cont.refLine(id) ;
@@ -96,18 +101,18 @@ public:
 	void setApproxE2(unsigned int id)
 	{
 		if(approxEdgeId2 == id) return ;
-		AttributeContainer& cont = map.template getAttributeContainer<EDGE>() ;
+		AttributeContainer& cont = m_map.template getAttributeContainer<EDGE>() ;
 		if(approxEdgeId2 != EMBNULL)
 			cont.unrefLine(approxEdgeId2) ;
 		if(id != EMBNULL) cont.refLine(id) ;
 		approxEdgeId2 = id ;
 	}
 
-    MAP& getMap() { return map; }
+    MAP& getMap() { return m_map; }
 
     bool operator==(const VSplit& vs) 
     {
-        return edge==vs.edge && left_edge==vs.left_edge && right_edge==vs.right_edge;
+        return m_edge==vs.m_edge && m_left_edge==vs.m_left_edge && m_right_edge==vs.m_right_edge;
     }
 } ;
 
