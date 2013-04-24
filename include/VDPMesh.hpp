@@ -236,44 +236,17 @@ void VDProgressiveMesh<PFP>::vertexSplit(VSplit<PFP>* vs)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::coarsen() {
     CGoGNout << "COARSEN" << CGoGNendl;
-    std::list<Node*>::iterator it;
-    std::list<Node*>::iterator it_back;
-    int compteur = 0;
-    bool stop = false;
-    while(!stop) {
-    	it=m_active_nodes.begin();
-		while(it != m_active_nodes.end()) {
-			it_back = it;
-			std::advance(it_back, 2);
-			if(coarsen(*it)==1) {
-				//Une modification a été faite
-				if(it != --m_active_nodes.end()) {
-					it = it_back;
-				}
-				++compteur;
-			}
-			else {
-				++it;
-			}
-		}
-		if(compteur==0) {
-			//Aucune modification n'a été faite, état stationnaire
-			//Arrêt de la simplification du maillage
-			stop = true;
-		}
-		else {
-			//Au moins une modification a été faite
-			//On recommence la simplification du maillage
-			compteur = 0;
-		}
-    }
+    std::list<Node*>::iterator it = m_active_nodes.begin();
+	while(it != m_active_nodes.end()) {
+		it = coarsen(*it);
+	}
     drawFront();
 }
 
 template <typename PFP>
-int VDProgressiveMesh<PFP>::coarsen(Node* n)
+std::list<Node*>::iterator VDProgressiveMesh<PFP>::coarsen(Node* n)
 {
-    int res = 0;
+	std::list<Node*>::iterator res = m_active_nodes.end();
     if(n && n->isActive()) {
         //Si n fait partie du front et qu'il n'est pas contenu dans la boîte d'intérêt
         Node* parent = n->getParent();
@@ -304,13 +277,12 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 
                 //Mise a jour des informations de l'arbre
                 m_active_nodes.erase(child_left->getCurrentPosition());
-                m_active_nodes.erase(child_right->getCurrentPosition());
+                res = m_active_nodes.erase(child_right->getCurrentPosition());
                 child_left->setActive(false);
                 child_right->setActive(false);
                 parent->setActive(true);
                 m_active_nodes.push_back(parent);
                 parent->setCurrentPosition(--m_active_nodes.end());
-                ++res;
             }
         }
     }
@@ -320,39 +292,17 @@ int VDProgressiveMesh<PFP>::coarsen(Node* n)
 template <typename PFP>
 void VDProgressiveMesh<PFP>::refine() {
     CGoGNout << "REFINE" << CGoGNendl;
-    std::list<Node*>::iterator it_back;
-    std::list<Node*>::iterator it;
-    int compteur = 0;
-    bool stop = false;
-    while(!stop) {
-    	it=m_active_nodes.begin();
-		while(it!=m_active_nodes.end()) {
-			it_back = it;
-			++it_back;
-			if(refine(*it)==1) {
-				//Une modification a été faite
-				++compteur;
-			}
-			it = it_back;
-		}
-		if(compteur==0) {
-			//Aucune modification n'a été faite, état stationnaire
-			//Arrêt de l'affinement du maillage
-			stop = true;
-		}
-		else {
-			//Au moins une modification a été faite
-			//On recommence l'affinement du maillage
-			compteur = 0;
-		}
-    }
+    std::list<Node*>::iterator it = m_active_nodes.begin();
+	while(it!=m_active_nodes.end()) {
+		it=refine(*it);
+	}
     drawFront();
 }
 
 template <typename PFP>
-int VDProgressiveMesh<PFP>::refine(Node* n)
+std::list<Node*>::iterator VDProgressiveMesh<PFP>::refine(Node* n)
 {
-    int res = 0;
+    std::list<Node*>::iterator res = m_active_nodes.end();
     if(n && n->isActive()) {
         //Si n fait partie du front
         Node* child_left = n->getLeftChild();
@@ -404,7 +354,7 @@ int VDProgressiveMesh<PFP>::refine(Node* n)
             m_map.template copyDartEmbedding<VERTEX>(m_map.phi_1(dd), dd1);
 
             //Mise a jour des informations de l'arbre
-            m_active_nodes.erase(n->getCurrentPosition());
+            res = m_active_nodes.erase(n->getCurrentPosition());
             n->setActive(false);
             child_left->setActive(true);
             child_right->setActive(true);
@@ -422,118 +372,120 @@ template <typename PFP>
 void VDProgressiveMesh<PFP>::updateRefinement() {
 	std::list<Node*>::iterator it = m_active_nodes.begin();
 	std::list<Node*>::iterator it_back;
-	bool stop = false;
-	int compteur = 0;
-	bool transformation = false;
-	while(!stop) {
-		it = m_active_nodes.begin();
-		while(it != m_active_nodes.end()) {
-			transformation = false;
-			if(it != m_active_nodes.begin()) {
-				//On retient le prédécesseur
-				it_back = it;
-				--it_back;
+	bool non_transformation = false;
+	while(it != m_active_nodes.end()) {
+		if((*it) && (*it)->isActive()) {
+			non_transformation = false;
+			it_back = it;
+			++it_back;
+			if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
+				//Si le noeud appartient à la boîte d'intérêt
+				it = forceRefine(*it);
+				if(it==m_active_nodes.end()) {
+					non_transformation = true;
+				}
 			}
 			else {
-				//Si l'élément en cours de traitement est le premier de la liste
-				it_back = m_active_nodes.end();
-			}
-
-			if((*it) && (*it)->isActive()) {
-				//Si le noeud est actuellement affiché
-				if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
-					//Si le noeud appartient à la boîte d'intérêt
-					if(refine(*it)==1) {
-						//Si l'opération a été effectuée => des éléments ont été supprimés
-						transformation = true;
-						++compteur;
+				//Si le noeud n'appartient pas à la boîte d'intérêt
+				if((*it)->getParent()) {
+					Node* child_left = (*it)->getParent()->getLeftChild();	//Possibilité d'être le noeud courant
+					Node* child_right = (*it)->getParent()->getRightChild();	//Possibilité d'être le noeud courant
+					if(		!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])
+						&&	!m_bb->contains(positionsTable[child_left->getVertex()])
+						&& 	!m_bb->contains(positionsTable[child_right->getVertex()])) {
+						//Si le noeud a un parent qui n'appartient pas à la boîte d'intérêt
+						it = coarsen(*it);
+						if(it==m_active_nodes.end()) {
+							non_transformation = true;
+						}
+					}
+					else {
+						++it;
 					}
 				}
 				else {
-					//Si le noeud n'appartient pas à la boîte d'intérêt
-					if((*it)->getParent()) {
-						Node* child_left = (*it)->getParent()->getLeftChild();	//Possibilité d'être le noeud courant
-						Node* child_right = (*it)->getParent()->getRightChild();	//Possibilité d'être le noeud courant
-						if(		!m_bb->contains(positionsTable[(*it)->getParent()->getVertex()])
-							&&	!m_bb->contains(positionsTable[child_left->getVertex()])
-							&& 	!m_bb->contains(positionsTable[child_right->getVertex()])) {
-							//Si le noeud a un parent qui n'appartient pas à la boîte d'intérêt
-							if(coarsen(*it)==1) {
-								//Si l'opération a été effectuée => des éléments ont été supprimés
-								transformation = true;
-								++compteur;
-							}
+					++it;
+				}
+			}
+			if(non_transformation) {
+				it = it_back;
+			}
+		}
+		else {
+			++it;
+		}
+	}
+}
+
+template <typename PFP>
+std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
+	std::stack<Node*>* pile = new std::stack<Node*>();
+	pile->push(n);
+	Node* n1;
+	std::list<Node*>::iterator res = m_active_nodes.end();
+	while(pile->size()>0) {
+		n1 = pile->top();
+		if(n1->getRightChild() && n1->getLeftChild() && (n1->getRightChild()->isActive() || n1->getLeftChild()->isActive())) {
+			//le noeud a été éclaté plus tôt dans la boucle
+			CGoGNout << pile->top() << CGoGNendl;
+			pile->pop();
+			CGoGNout << "On passe ici"  << CGoGNendl;
+		}
+		else if(!n1->isActive()) {
+			//le noeud n'est pas encore actif
+			pile->push(n1->getParent());
+		}
+		else if((res = refine(n1))!=m_active_nodes.end()) {
+			//si la transformation a réussi
+			pile->pop();
+		}
+		else {
+			if(n1->getParent()) {
+				VSplit<PFP>* vs = n1->getVSplit();
+				if(vs) {
+					Dart d2 = vs->getLeftEdge();
+					Dart d1 = vs->getOppositeLeftEdge();
+					Dart dd2 = vs->getRightEdge();
+					Dart dd1 = vs->getOppositeRightEdge();
+
+					CGoGNout << "D1 : " << d1 << CGoGNendl;
+					CGoGNout << "D2 : " << d2 << CGoGNendl;
+					CGoGNout << "DD1 : " << dd1 << CGoGNendl;
+					CGoGNout << "DD2 : " << dd2 << CGoGNendl;
+
+					Node* n_d1 = noeud[d1].node;
+					Node* n_d2 = noeud[d2].node;
+					Node* n_dd2 = noeud[dd2].node;
+					Node* n_dd1 = noeud[dd1].node;
+
+					if(		!inactiveMarker.isMarked(d1) && !inactiveMarker.isMarked(d2)
+						&&	!inactiveMarker.isMarked(dd1) && !inactiveMarker.isMarked(dd2)) {
+						CGoGNout << "Pop : " << pile->size()  << CGoGNendl;
+						pile->pop();
+					}
+					else {
+						if(inactiveMarker.isMarked(d1)) {
+							pile->push(n_d1);
+							CGoGNout << "On passe la : d1" << CGoGNendl;
+						}
+						if(inactiveMarker.isMarked(d2)) {
+							pile->push(n_d2);
+							CGoGNout << "On passe la : d2" << CGoGNendl;
+						}
+						if(inactiveMarker.isMarked(dd1)) {
+							pile->push(n_dd1);
+							CGoGNout << "On passe la : dd1" << CGoGNendl;
+						}
+						if(inactiveMarker.isMarked(dd2)) {
+							pile->push(n_dd2);
+							CGoGNout << "On passe la : dd2" << CGoGNendl;
 						}
 					}
 				}
 			}
-
-			if(transformation) {
-				//Si une transformation a eu lieu = des élément ont été supprimés
-				if(it_back != m_active_nodes.end()) {
-					it = ++it_back;
-				}
-				else {
-					it = m_active_nodes.begin();
-				}
-			}
 			else {
-				//Si aucune transformation n'a eu lieu
-				std::advance(it_back, 2);	//On saute l'élément suivant, qui vient d'être traité à l'instant
-				it = it_back;
+				pile->pop();
 			}
-		}
-		CGoGNout << "Compteur : " << compteur << CGoGNendl;
-		if(compteur == 0) {
-			stop = true;
-		}
-		else {
-			compteur = 0;
-		}
-	}
-}
-
-template <typename PFP>
-bool VDProgressiveMesh<PFP>::isEdgeCollapseLegal(Node* n) {
-	bool res = false;
-	if(n->getParent()) {
-		Node* child_left = n->getParent()->getLeftChild();
-		Node* child_right = n->getParent()->getRightChild();
-		if(child_left && child_right && child_left->isActive() && child_right->isActive()) {
-			VSplit<PFP>* vs = n->getVSplit();
-			if(vs) {
-				Dart dd2 = vs->getRightEdge();
-				Dart d2 = vs->getLeftEdge();
-				Dart d1 = vs->getOppositeLeftEdge();
-				Dart dd1 = vs->getOppositeRightEdge();
-
-				if( !inactiveMarker.isMarked(d1)
-				&&  !inactiveMarker.isMarked(d2)
-				&&  !inactiveMarker.isMarked(dd1)
-				&&  !inactiveMarker.isMarked(dd2))
-					res = true;
-			}
-		}
-	}
-	return res;
-}
-
-template <typename PFP>
-bool VDProgressiveMesh<PFP>::isVertexSplitLegal(Node* n) {
-	bool res = false;
-	if(n->isActive()) {
-		VSplit<PFP>* vs = n->getVSplit();
-		if(vs) {
-			Dart dd2 = vs->getRightEdge();
-			Dart d2 = vs->getLeftEdge();
-			Dart d1 = vs->getOppositeLeftEdge();
-			Dart dd1 = vs->getOppositeRightEdge();
-
-			if( !inactiveMarker.isMarked(d1)
-			&&  !inactiveMarker.isMarked(d2)
-			&&  !inactiveMarker.isMarked(dd1)
-			&&  !inactiveMarker.isMarked(dd2))
-				res = true;
 		}
 	}
 	return res;

@@ -36,6 +36,7 @@
 
 #include <iterator>
 #include <vector>
+#include <stack>
 #include <list>
 
 #include "Utils/quantization.h"
@@ -116,14 +117,11 @@ public:
 	void coarsen() ;
 	void refine() ;
 
-	int coarsen(Node* n) ;
-	int refine(Node* n) ;
+	std::list<Node*>::iterator coarsen(Node* n) ;
+	std::list<Node*>::iterator refine(Node* n) ;
 
 	void updateRefinement();
-	void forceRefine(Node* n);
-
-	bool isEdgeCollapseLegal(Node* n);
-	bool isVertexSplitLegal(Node* n);
+	std::list<Node*>::iterator forceRefine(Node* n);
 
     /*DEBUG FUNCTIONS*/
     int getForestHeight() { return m_height; }
