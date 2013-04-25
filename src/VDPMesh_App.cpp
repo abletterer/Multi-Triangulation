@@ -49,9 +49,9 @@ VDPMesh_App::VDPMesh_App() :
 	m_vectorShader(NULL),
 	m_simpleColorShader(NULL),
 	m_pointSprite(NULL),
+    m_strings(NULL),
     m_inactiveMarker(myMap),
-    m_pmesh(NULL),
-    m_strings(NULL)
+    m_pmesh(NULL)
 {
 	normalScaleFactor = 1.0f ;
 	vertexScaleFactor = 0.1f ;

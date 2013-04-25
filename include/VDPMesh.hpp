@@ -422,84 +422,75 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 	std::stack<Node*>* pile = new std::stack<Node*>();
 	pile->push(n);
 	Node* n1;
+	bool stop = false;
 	std::list<Node*>::iterator res = m_active_nodes.end();
 	while(pile->size()>0) {
 		CGoGNout << "Taille de la pile : " << pile->size() << CGoGNendl;
+		CGoGNout << pile->top() << CGoGNendl;
 		n1 = pile->top();
-		if(!n1) {
-			pile->pop();
-		}
-		if(n1->getRightChild() && n1->getLeftChild() && (n1->getRightChild()->isActive() || n1->getLeftChild()->isActive())) {
-			//le noeud a été éclaté plus tôt dans la boucle
-			CGoGNout << pile->top() << CGoGNendl;
-			pile->pop();
-			CGoGNout << "On passe ici"  << CGoGNendl;
-		}
-		else if(!n1->isActive()) {
-			//le noeud n'est pas encore actif
-			pile->push(n1->getParent());
-		}
-		else if((res = refine(n1))!=m_active_nodes.end()) {
-			//si la transformation a réussi
+		stop = false;
+		if(n1==0) {
 			pile->pop();
 		}
 		else {
-			if(n1->getParent()) {
+			if(n1->getRightChild() && n1->getLeftChild()) {
 				VSplit<PFP>* vs = n1->getVSplit();
-				if(vs) {
-					Dart d2_1 = m_map.phi_1(vs->getLeftEdge());
-					Dart d1 = vs->getOppositeLeftEdge();
-					Dart d1_1 = m_map.phi_1(vs->getOppositeLeftEdge());
-					Dart dd2_1 = m_map.phi_1(vs->getRightEdge());
-					Dart dd1 = vs->getOppositeRightEdge();
-					Dart dd1_1 = m_map.phi_1(vs->getOppositeRightEdge());
-
-					Node* n_d1 = noeud[d1].node;
-					Node* n_d1_1 = noeud[d1_1].node;
-					Node* n_d2_1 = noeud[d2_1].node;
-					Node* n_dd2_1 = noeud[dd2_1].node;
-					Node* n_dd1 = noeud[dd1].node;
-					Node* n_dd1_1= noeud[dd1_1].node;
-
-					if(		!inactiveMarker.isMarked(d1) && !inactiveMarker.isMarked(d2_1)
-						&&	!inactiveMarker.isMarked(dd1_1) && !inactiveMarker.isMarked(dd2_1)
-						&& 	!inactiveMarker.isMarked(d1_1) && !inactiveMarker.isMarked(dd1_1)) {
-						CGoGNout << "Pop : " << pile->size()  << CGoGNendl;
-						pile->pop();
-					}
-					else {
-						if(inactiveMarker.isMarked(d1)) {
-							pile->push(n_d1);
-							CGoGNout << "On passe la : d1" << CGoGNendl;
-						}
-						if(inactiveMarker.isMarked(d1_1)) {
-							pile->push(n_d1_1);
-							CGoGNout << "On passe la : d1" << CGoGNendl;
-						}
-						if(inactiveMarker.isMarked(d2_1)) {
-							pile->push(n_d2_1);
-							CGoGNout << "On passe la : d2" << CGoGNendl;
-						}
-						if(inactiveMarker.isMarked(dd1)) {
-							pile->push(n_dd1);
-							CGoGNout << "On passe la : dd1" << CGoGNendl;
-						}
-						if(inactiveMarker.isMarked(dd1_1)) {
-							pile->push(n_dd1_1);
-							CGoGNout << "On passe la : dd1" << CGoGNendl;
-						}
-						if(inactiveMarker.isMarked(dd2_1)) {
-							pile->push(n_dd2_1);
-							CGoGNout << "On passe la : dd2" << CGoGNendl;
-						}
-					}
-				}
-				else {
+				Dart d = vs->getEdge();
+				if(!inactiveMarker.isMarked(d)) {
 					pile->pop();
+					stop = true;
 				}
 			}
-			else {
-				pile->pop();
+			if(!stop) {
+				if(!n1->isActive()) {
+					//le noeud n'est pas encore actif
+					pile->push(n1->getParent());
+				}
+				else if((res = refine(n1))!=m_active_nodes.end()) {
+					//si la transformation a réussi
+					pile->pop();
+				}
+				else {
+					VSplit<PFP>* vs = n1->getVSplit();
+					if(vs) {
+						Dart d1 = m_map.phi_1(vs->getOppositeLeftEdge());
+						Dart d2 = m_map.phi_1(vs->getLeftEdge());
+						Dart dd1 = m_map.phi_1(vs->getOppositeRightEdge());
+						Dart dd2 = m_map.phi_1(vs->getRightEdge());
+
+						Node* n_d1 = noeud[d1].node;
+						Node* n_d2 = noeud[d2].node;
+						Node* n_dd1 = noeud[dd1].node;
+						Node* n_dd2 = noeud[dd2].node;
+
+						if(		!inactiveMarker.isMarked(d1) && !inactiveMarker.isMarked(d2)
+							&&	!inactiveMarker.isMarked(dd1) && !inactiveMarker.isMarked(dd2)) {
+							CGoGNout << "Pop : " << pile->size()  << CGoGNendl;
+							pile->pop();
+						}
+						else {
+							if(inactiveMarker.isMarked(d1)) {
+								pile->push(n_d1);
+								CGoGNout << "On passe la : d1" << CGoGNendl;
+							}
+							if(inactiveMarker.isMarked(d2)) {
+								pile->push(n_d2);
+								CGoGNout << "On passe la : d2" << CGoGNendl;
+							}
+							if(inactiveMarker.isMarked(dd1)) {
+								pile->push(n_dd1);
+								CGoGNout << "On passe la : dd1 : " << n_dd1 << CGoGNendl;
+							}
+							if(inactiveMarker.isMarked(dd2)) {
+								pile->push(n_dd2);
+								CGoGNout << "On passe la : dd2 : " << n_dd1 << CGoGNendl;
+							}
+						}
+					}
+					else {
+						pile->pop();
+					}
+				}
 			}
 		}
 	}
