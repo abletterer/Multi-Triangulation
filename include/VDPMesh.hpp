@@ -424,7 +424,11 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 	Node* n1;
 	std::list<Node*>::iterator res = m_active_nodes.end();
 	while(pile->size()>0) {
+		CGoGNout << "Taille de la pile : " << pile->size() << CGoGNendl;
 		n1 = pile->top();
+		if(!n1) {
+			pile->pop();
+		}
 		if(n1->getRightChild() && n1->getLeftChild() && (n1->getRightChild()->isActive() || n1->getLeftChild()->isActive())) {
 			//le noeud a été éclaté plus tôt dans la boucle
 			CGoGNout << pile->top() << CGoGNendl;
@@ -443,23 +447,23 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 			if(n1->getParent()) {
 				VSplit<PFP>* vs = n1->getVSplit();
 				if(vs) {
-					Dart d2 = vs->getLeftEdge();
+					Dart d2_1 = m_map.phi_1(vs->getLeftEdge());
 					Dart d1 = vs->getOppositeLeftEdge();
-					Dart dd2 = vs->getRightEdge();
+					Dart d1_1 = m_map.phi_1(vs->getOppositeLeftEdge());
+					Dart dd2_1 = m_map.phi_1(vs->getRightEdge());
 					Dart dd1 = vs->getOppositeRightEdge();
-
-					CGoGNout << "D1 : " << d1 << CGoGNendl;
-					CGoGNout << "D2 : " << d2 << CGoGNendl;
-					CGoGNout << "DD1 : " << dd1 << CGoGNendl;
-					CGoGNout << "DD2 : " << dd2 << CGoGNendl;
+					Dart dd1_1 = m_map.phi_1(vs->getOppositeRightEdge());
 
 					Node* n_d1 = noeud[d1].node;
-					Node* n_d2 = noeud[d2].node;
-					Node* n_dd2 = noeud[dd2].node;
+					Node* n_d1_1 = noeud[d1_1].node;
+					Node* n_d2_1 = noeud[d2_1].node;
+					Node* n_dd2_1 = noeud[dd2_1].node;
 					Node* n_dd1 = noeud[dd1].node;
+					Node* n_dd1_1= noeud[dd1_1].node;
 
-					if(		!inactiveMarker.isMarked(d1) && !inactiveMarker.isMarked(d2)
-						&&	!inactiveMarker.isMarked(dd1) && !inactiveMarker.isMarked(dd2)) {
+					if(		!inactiveMarker.isMarked(d1) && !inactiveMarker.isMarked(d2_1)
+						&&	!inactiveMarker.isMarked(dd1_1) && !inactiveMarker.isMarked(dd2_1)
+						&& 	!inactiveMarker.isMarked(d1_1) && !inactiveMarker.isMarked(dd1_1)) {
 						CGoGNout << "Pop : " << pile->size()  << CGoGNendl;
 						pile->pop();
 					}
@@ -468,19 +472,30 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 							pile->push(n_d1);
 							CGoGNout << "On passe la : d1" << CGoGNendl;
 						}
-						if(inactiveMarker.isMarked(d2)) {
-							pile->push(n_d2);
+						if(inactiveMarker.isMarked(d1_1)) {
+							pile->push(n_d1_1);
+							CGoGNout << "On passe la : d1" << CGoGNendl;
+						}
+						if(inactiveMarker.isMarked(d2_1)) {
+							pile->push(n_d2_1);
 							CGoGNout << "On passe la : d2" << CGoGNendl;
 						}
 						if(inactiveMarker.isMarked(dd1)) {
 							pile->push(n_dd1);
 							CGoGNout << "On passe la : dd1" << CGoGNendl;
 						}
-						if(inactiveMarker.isMarked(dd2)) {
-							pile->push(n_dd2);
+						if(inactiveMarker.isMarked(dd1_1)) {
+							pile->push(n_dd1_1);
+							CGoGNout << "On passe la : dd1" << CGoGNendl;
+						}
+						if(inactiveMarker.isMarked(dd2_1)) {
+							pile->push(n_dd2_1);
 							CGoGNout << "On passe la : dd2" << CGoGNendl;
 						}
 					}
+				}
+				else {
+					pile->pop();
 				}
 			}
 			else {
