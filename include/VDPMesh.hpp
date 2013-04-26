@@ -165,8 +165,8 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
         n->setHeight(height+1);
         
         if(m_height<=height) {
-            /*Si la hauteur du plus grand arbre est inférieure ou égale à celle de l'arbre actuel*/
-            /*NB: La hauteur du plus grand arbre ne sera jamais inférieure à celle de l'arbre courant*/
+            //Si la hauteur du plus grand arbre est inférieure ou égale à celle de l'arbre actuel
+            //NB: La hauteur du plus grand arbre ne sera jamais inférieure à celle de l'arbre courant
             ++m_height;
         }
 
@@ -197,7 +197,6 @@ void VDProgressiveMesh<PFP>::createPM(unsigned int percentWantedVertices)
 
 		if(nbVertices <= nbWantedVertices)
 			finished = true ;
-
 	}
 	delete m_selector ;
 	m_selector = NULL ;
@@ -316,9 +315,11 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::refine(Node* n)
 	        Dart dd = m_map.phi2(d);
 	        Dart d2 = vs->getLeftEdge();
 	        Dart dd2 = vs->getRightEdge();
+	        //Dart d1 = vs->getOppositeLeftEdge();
 	        Dart d1 = m_map.phi2(d2) ;	//On prend les côtés opposés
 	        //vs->setOppositeLeftEdge(d1);
-			Dart dd1 = m_map.phi2(dd2) ;
+			//Dart dd1 = vs->getOppositeRightEdge();
+	        Dart dd1 = m_map.phi2(dd2) ;
 			//vs->setOppositeRightEdge(dd1);
 
 	        //Vérification de la présence des brins entourant la paire de triangles
@@ -326,11 +327,13 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::refine(Node* n)
             ||  inactiveMarker.isMarked(d2)
             ||  inactiveMarker.isMarked(dd1)
             ||  inactiveMarker.isMarked(dd2)) {
+				CGoGNout << "Un des brins (au moins) entourant la paire de triangles n'est pas présent" << CGoGNendl;
                 return res;
             }
 
             //Vérification de la bonne configuration des faces adjacentes
             if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
+            	CGoGNout << "D2 et DD2 ne sont pas orientés sur le même sommet" << CGoGNendl;
             	return res;
             }
 
@@ -381,6 +384,9 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 			if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
 				//Si le noeud appartient à la boîte d'intérêt
 				it = forceRefine(*it);
+				if(it_back==m_active_nodes.end()) {
+					it = m_active_nodes.end();
+				}
 				if(it==m_active_nodes.end()) {
 					non_transformation = true;
 				}
@@ -447,8 +453,15 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 					//le noeud n'est pas encore actif
 					if(!searchChildActive(n1)) {
 						//Aucun des enfants n'est actif
-						pile->push(n1->getParent());
 						CGoGNout << "Aucun des fils n'est actif" << CGoGNendl;
+						std::list<Node*>::iterator parent_actif = searchParentActive(n1);
+						if(parent_actif!=m_active_nodes.end()) {
+							pile->push(*parent_actif);
+						}
+						else {
+							pile->pop();
+							CGoGNout << "Aucun des parents n'est actif" << CGoGNendl;
+						}
 					}
 					else {
 						CGoGNout << "Au moins 1 des fils est actif" << CGoGNendl;
@@ -537,6 +550,21 @@ bool VDProgressiveMesh<PFP>::searchChildActive(Node* noeud) {
 		else {
 			res = searchChildActive(noeud->getLeftChild());
 		}
+	}
+	return res;
+}
+
+template <typename PFP>
+std::list<Node*>::iterator VDProgressiveMesh<PFP>::searchParentActive(Node* noeud) {
+	std::list<Node*>::iterator res = m_active_nodes.end();
+	if(noeud->getParent()) {
+		if(noeud->getParent()->isActive()) {
+			res = noeud->getParent()->getCurrentPosition();
+		}
+		else {
+			res = searchParentActive(noeud->getParent());
+		}
+
 	}
 	return res;
 }

@@ -124,6 +124,7 @@ public:
 	std::list<Node*>::iterator forceRefine(Node* n);
 
 	bool searchChildActive(Node* noeud);
+	std::list<Node*>::iterator searchParentActive(Node* noeud);
 
     /*DEBUG FUNCTIONS*/
     int getForestHeight() { return m_height; }
