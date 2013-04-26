@@ -268,11 +268,19 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::coarsen(Node* n)
                 ||  inactiveMarker.isMarked(dd2))
                     return res;
 
+                CGoGNout << "Ancien D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+                CGoGNout << "Ancien DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+
                 edgeCollapse(vs);
 
                 m_map.template setOrbitEmbedding<VERTEX>(d2, vs->getApproxV());
 	            m_map.template setOrbitEmbedding<EDGE>(d2, vs->getApproxE1());
                 m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
+
+                if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
+					CGoGNout << "Nouveau D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+					CGoGNout << "Nouveau DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+                }
 
                 //Mise a jour des informations de l'arbre
                 m_active_nodes.erase(child_left->getCurrentPosition());
