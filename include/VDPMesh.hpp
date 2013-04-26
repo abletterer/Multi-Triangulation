@@ -317,9 +317,9 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::refine(Node* n)
 	        Dart d2 = vs->getLeftEdge();
 	        Dart dd2 = vs->getRightEdge();
 	        Dart d1 = m_map.phi2(d2) ;	//On prend les côtés opposés
-	        vs->setOppositeLeftEdge(d1);
+	        //vs->setOppositeLeftEdge(d1);
 			Dart dd1 = m_map.phi2(dd2) ;
-			vs->setOppositeRightEdge(dd1);
+			//vs->setOppositeRightEdge(dd1);
 
 	        //Vérification de la présence des brins entourant la paire de triangles
             if( inactiveMarker.isMarked(d1)
@@ -425,37 +425,48 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 	bool stop = false;
 	std::list<Node*>::iterator res = m_active_nodes.end();
 	while(pile->size()>0) {
-		CGoGNout << "Taille de la pile : " << pile->size() << CGoGNendl;
-		CGoGNout << pile->top() << CGoGNendl;
 		n1 = pile->top();
 		stop = false;
 		if(n1==0) {
 			pile->pop();
+			CGoGNout << "Element illégal" << CGoGNendl;
 		}
 		else {
 			if(n1->getRightChild() && n1->getLeftChild()) {
 				VSplit<PFP>* vs = n1->getVSplit();
 				Dart d = vs->getEdge();
 				if(!inactiveMarker.isMarked(d)) {
+					//Si la transformation a déjà été faite
 					pile->pop();
 					stop = true;
+					CGoGNout << "La transformation a déjà été effectuée" << CGoGNendl;
 				}
 			}
 			if(!stop) {
 				if(!n1->isActive()) {
 					//le noeud n'est pas encore actif
-					pile->push(n1->getParent());
+					if(!searchChildActive(n1)) {
+						//Aucun des enfants n'est actif
+						pile->push(n1->getParent());
+						CGoGNout << "Aucun des fils n'est actif" << CGoGNendl;
+					}
+					else {
+						CGoGNout << "Au moins 1 des fils est actif" << CGoGNendl;
+					}
 				}
 				else if((res = refine(n1))!=m_active_nodes.end()) {
-					//si la transformation a réussi
+					//si la transformation était légale et qu'elle a réussi
 					pile->pop();
+					CGoGNout << "La transformation a réussi" << CGoGNendl;
 				}
 				else {
 					VSplit<PFP>* vs = n1->getVSplit();
 					if(vs) {
-						Dart d1 = m_map.phi_1(vs->getOppositeLeftEdge());
+						Dart d1 = vs->getOppositeLeftEdge();
+						Dart d1_1 = m_map.phi_1(d1);
 						Dart d2 = m_map.phi_1(vs->getLeftEdge());
-						Dart dd1 = m_map.phi_1(vs->getOppositeRightEdge());
+						Dart dd1 = vs->getOppositeRightEdge();
+						Dart dd1_1 = m_map.phi_1(dd1);
 						Dart dd2 = m_map.phi_1(vs->getRightEdge());
 
 						Node* n_d1 = noeud[d1].node;
@@ -464,8 +475,10 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 						Node* n_dd2 = noeud[dd2].node;
 
 						if(		!inactiveMarker.isMarked(d1) && !inactiveMarker.isMarked(d2)
-							&&	!inactiveMarker.isMarked(dd1) && !inactiveMarker.isMarked(dd2)) {
+							&&	!inactiveMarker.isMarked(dd1) && !inactiveMarker.isMarked(dd2)
+							&& !inactiveMarker.isMarked(d1_1) && !inactiveMarker.isMarked(dd1_1)) {
 							CGoGNout << "Pop : " << pile->size()  << CGoGNendl;
+							CGoGNout << vs->getEdge() << CGoGNendl;
 							pile->pop();
 						}
 						else {
@@ -485,6 +498,14 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 								pile->push(n_dd2);
 								CGoGNout << "On passe la : dd2 : " << n_dd1 << CGoGNendl;
 							}
+							if(inactiveMarker.isMarked(d1_1)) {
+								pile->push(n_d1);
+								CGoGNout << "On passe la : d1_1" << CGoGNendl;
+							}
+							if(inactiveMarker.isMarked(dd1_1)) {
+								pile->push(n_d1);
+								CGoGNout << "On passe la : dd1_1" << CGoGNendl;
+							}
 						}
 					}
 					else {
@@ -492,6 +513,28 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 					}
 				}
 			}
+		}
+	}
+	return res;
+}
+
+template <typename PFP>
+bool VDProgressiveMesh<PFP>::searchChildActive(Node* noeud) {
+	bool res = false;
+	if(noeud->getRightChild()) {
+		if(noeud->getRightChild()->isActive()) {
+			res = true;
+		}
+		else {
+			res = searchChildActive(noeud->getRightChild());
+		}
+	}
+	if(!res && noeud->getLeftChild()) {
+		if(noeud->getLeftChild()->isActive()) {
+			res = true;
+		}
+		else {
+			res = searchChildActive(noeud->getLeftChild());
 		}
 	}
 	return res;

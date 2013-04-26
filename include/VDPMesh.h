@@ -123,6 +123,8 @@ public:
 	void updateRefinement();
 	std::list<Node*>::iterator forceRefine(Node* n);
 
+	bool searchChildActive(Node* noeud);
+
     /*DEBUG FUNCTIONS*/
     int getForestHeight() { return m_height; }
     void drawForest();
