@@ -452,6 +452,7 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 					}
 					else {
 						CGoGNout << "Au moins 1 des fils est actif" << CGoGNendl;
+						pile->pop();
 					}
 				}
 				else if((res = refine(n1))!=m_active_nodes.end()) {
@@ -496,7 +497,7 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 							}
 							if(inactiveMarker.isMarked(dd2)) {
 								pile->push(n_dd2);
-								CGoGNout << "On passe la : dd2 : " << n_dd1 << CGoGNendl;
+								CGoGNout << "On passe la : dd2 : " << n_dd2 << CGoGNendl;
 							}
 							if(inactiveMarker.isMarked(d1_1)) {
 								pile->push(n_d1);
