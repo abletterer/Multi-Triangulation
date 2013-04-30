@@ -268,8 +268,8 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::coarsen(Node* n)
                 ||  inactiveMarker.isMarked(dd2))
                     return res;
 
-                CGoGNout << "Ancien D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-                CGoGNout << "Ancien DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+                //CGoGNout << "Ancien D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+                //CGoGNout << "Ancien DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
 
                 edgeCollapse(vs);
 
@@ -278,8 +278,8 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::coarsen(Node* n)
                 m_map.template setOrbitEmbedding<EDGE>(dd2, vs->getApproxE2());
 
                 if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
-					CGoGNout << "Nouveau D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
-					CGoGNout << "Nouveau DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
+					//CGoGNout << "Nouveau D2 : " << m_map.template getEmbedding<VERTEX>(d2) << CGoGNendl;
+					//CGoGNout << "Nouveau DD2 : " << m_map.template getEmbedding<VERTEX>(dd2) << CGoGNendl;
                 }
 
                 //Mise a jour des informations de l'arbre
@@ -335,13 +335,13 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::refine(Node* n)
             ||  inactiveMarker.isMarked(d2)
             ||  inactiveMarker.isMarked(dd1)
             ||  inactiveMarker.isMarked(dd2)) {
-				CGoGNout << "Un des brins (au moins) entourant la paire de triangles n'est pas présent" << CGoGNendl;
+				//CGoGNout << "Un des brins (au moins) entourant la paire de triangles n'est pas présent" << CGoGNendl;
                 return res;
             }
 
             //Vérification de la bonne configuration des faces adjacentes
             if(m_map.template getEmbedding<VERTEX>(d2) != m_map.template getEmbedding<VERTEX>(dd2)) {
-            	CGoGNout << "D2 et DD2 ne sont pas orientés sur le même sommet" << CGoGNendl;
+            	//CGoGNout << "D2 et DD2 ne sont pas orientés sur le même sommet" << CGoGNendl;
             	return res;
             }
 
@@ -391,12 +391,14 @@ void VDProgressiveMesh<PFP>::updateRefinement() {
 			++it_back;
 			if(m_bb->contains(positionsTable[(*it)->getVertex()])) {
 				//Si le noeud appartient à la boîte d'intérêt
-				it = forceRefine(*it);
+				it = refine(*it);
 				if(it_back==m_active_nodes.end()) {
 					it = m_active_nodes.end();
 				}
-				if(it==m_active_nodes.end()) {
-					non_transformation = true;
+				else {
+					if(it==m_active_nodes.end()) {
+						non_transformation = true;
+					}
 				}
 			}
 			else {
@@ -443,7 +445,7 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 		stop = false;
 		if(n1==0) {
 			pile->pop();
-			CGoGNout << "Element illégal" << CGoGNendl;
+			//CGoGNout << "Element illégal" << CGoGNendl;
 		}
 		else {
 			if(n1->getRightChild() && n1->getLeftChild()) {
@@ -453,7 +455,7 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 					//Si la transformation a déjà été faite
 					pile->pop();
 					stop = true;
-					CGoGNout << "La transformation a déjà été effectuée" << CGoGNendl;
+					//CGoGNout << "La transformation a déjà été effectuée" << CGoGNendl;
 				}
 			}
 			if(!stop) {
@@ -461,25 +463,25 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 					//le noeud n'est pas encore actif
 					if(!searchChildActive(n1)) {
 						//Aucun des enfants n'est actif
-						CGoGNout << "Aucun des fils n'est actif" << CGoGNendl;
+						//CGoGNout << "Aucun des fils n'est actif" << CGoGNendl;
 						std::list<Node*>::iterator parent_actif = searchParentActive(n1);
 						if(parent_actif!=m_active_nodes.end()) {
 							pile->push(*parent_actif);
 						}
 						else {
 							pile->pop();
-							CGoGNout << "Aucun des parents n'est actif" << CGoGNendl;
+							//CGoGNout << "Aucun des parents n'est actif" << CGoGNendl;
 						}
 					}
 					else {
-						CGoGNout << "Au moins 1 des fils est actif" << CGoGNendl;
+						//CGoGNout << "Au moins 1 des fils est actif" << CGoGNendl;
 						pile->pop();
 					}
 				}
 				else if((res = refine(n1))!=m_active_nodes.end()) {
 					//si la transformation était légale et qu'elle a réussi
 					pile->pop();
-					CGoGNout << "La transformation a réussi" << CGoGNendl;
+					//CGoGNout << "La transformation a réussi" << CGoGNendl;
 				}
 				else {
 					VSplit<PFP>* vs = n1->getVSplit();
@@ -499,34 +501,34 @@ std::list<Node*>::iterator VDProgressiveMesh<PFP>::forceRefine(Node* n) {
 						if(		!inactiveMarker.isMarked(d1) && !inactiveMarker.isMarked(d2)
 							&&	!inactiveMarker.isMarked(dd1) && !inactiveMarker.isMarked(dd2)
 							&& !inactiveMarker.isMarked(d1_1) && !inactiveMarker.isMarked(dd1_1)) {
-							CGoGNout << "Pop : " << pile->size()  << CGoGNendl;
-							CGoGNout << vs->getEdge() << CGoGNendl;
+							//CGoGNout << "Pop : " << pile->size()  << CGoGNendl;
+							//CGoGNout << vs->getEdge() << CGoGNendl;
 							pile->pop();
 						}
 						else {
 							if(inactiveMarker.isMarked(d1)) {
 								pile->push(n_d1);
-								CGoGNout << "On passe la : d1" << CGoGNendl;
+								//CGoGNout << "On passe la : d1" << CGoGNendl;
 							}
 							if(inactiveMarker.isMarked(d2)) {
 								pile->push(n_d2);
-								CGoGNout << "On passe la : d2" << CGoGNendl;
+								//CGoGNout << "On passe la : d2" << CGoGNendl;
 							}
 							if(inactiveMarker.isMarked(dd1)) {
 								pile->push(n_dd1);
-								CGoGNout << "On passe la : dd1 : " << n_dd1 << CGoGNendl;
+								//CGoGNout << "On passe la : dd1 : " << n_dd1 << CGoGNendl;
 							}
 							if(inactiveMarker.isMarked(dd2)) {
 								pile->push(n_dd2);
-								CGoGNout << "On passe la : dd2 : " << n_dd2 << CGoGNendl;
+								//CGoGNout << "On passe la : dd2 : " << n_dd2 << CGoGNendl;
 							}
 							if(inactiveMarker.isMarked(d1_1)) {
 								pile->push(n_d1);
-								CGoGNout << "On passe la : d1_1" << CGoGNendl;
+								//CGoGNout << "On passe la : d1_1" << CGoGNendl;
 							}
 							if(inactiveMarker.isMarked(dd1_1)) {
 								pile->push(n_d1);
-								CGoGNout << "On passe la : dd1_1" << CGoGNendl;
+								//CGoGNout << "On passe la : dd1_1" << CGoGNendl;
 							}
 						}
 					}
